@@ -278,6 +278,7 @@ function initStudyPlanner() {
                         const taskDot = document.createElement('div');
                         taskDot.classList.add('task-dot');
                         if(task.completed) taskDot.classList.add('done');
+                        if(task.isDeadline) taskDot.classList.add('exam-dot');
                         previewContainer.appendChild(taskDot);
                     });
                     
@@ -302,6 +303,23 @@ function initStudyPlanner() {
                         progressDiv.textContent = `%${percent}`;
                     }
                     dayCell.appendChild(progressDiv);
+                }
+
+                // Deadline Day Highlighting
+                let hasUnfinishedDeadline = dayData.tasks.some(t => t.isDeadline && !t.completed);
+                if (hasUnfinishedDeadline) {
+                    const [y, m, d] = dateStr.split('-');
+                    const taskDate = new Date(y, m - 1, d);
+                    const today = new Date();
+                    today.setHours(0,0,0,0);
+                    const diffTime = taskDate - today;
+                    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+                    
+                    if (diffDays >= 0 && diffDays <= 3) {
+                        dayCell.classList.add('deadline-urgent');
+                    } else if (diffDays > 3 && diffDays <= 5) {
+                        dayCell.classList.add('deadline-near');
+                    }
                 }
             }
 
@@ -355,6 +373,7 @@ function initStudyPlanner() {
             const li = document.createElement('li');
             li.classList.add('task-item');
             if (task.completed) li.classList.add('completed');
+            if (task.isDeadline) li.classList.add('is-exam');
             
             li.innerHTML = `
                 <div class="task-item-header">
@@ -367,13 +386,13 @@ function initStudyPlanner() {
                 <input type="text" class="task-note-input" placeholder="Küçük not ekle (Örn: 50 soru çözüldü, 40dk çalışıldı...)" value="${task.note || ''}">
             `;
             
-            // Events
             const checkbox = li.querySelector('.task-checkbox');
             checkbox.addEventListener('change', (e) => {
                 task.completed = e.target.checked;
                 savePlannerData();
                 renderModalContent(); // re-render to update stats and styles
                 renderCalendar(); // update background calendar
+                renderUpcomingDeadlines(); // update alerts panel
             });
 
             const deleteBtn = li.querySelector('.btn-delete-task');
@@ -382,6 +401,7 @@ function initStudyPlanner() {
                 savePlannerData();
                 renderModalContent();
                 renderCalendar();
+                renderUpcomingDeadlines(); // update alerts panel
             });
 
             const noteInput = li.querySelector('.task-note-input');
@@ -400,18 +420,24 @@ function initStudyPlanner() {
     addTaskForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const text = newTaskInput.value.trim();
+        const deadlineCheckbox = document.getElementById('new-task-deadline');
+        const isDeadline = deadlineCheckbox ? deadlineCheckbox.checked : false;
+
         if (text && activeDateStr) {
             const dayData = getDayData(activeDateStr);
             dayData.tasks.push({
                 id: Date.now(),
                 text: text,
                 completed: false,
-                note: ""
+                note: "",
+                isDeadline: isDeadline
             });
             savePlannerData();
             newTaskInput.value = '';
+            if (deadlineCheckbox) deadlineCheckbox.checked = false;
             renderModalContent();
             renderCalendar();
+            renderUpcomingDeadlines();
         }
     });
 
@@ -442,7 +468,69 @@ function initStudyPlanner() {
         renderCalendar();
     });
 
+    // Alert Panel Logic
+    function renderUpcomingDeadlines() {
+        const alertsContainer = document.getElementById('alerts-container');
+        const alertsPanel = document.getElementById('deadline-alerts-panel');
+        if (!alertsContainer || !alertsPanel) return;
+
+        alertsContainer.innerHTML = '';
+        let upcomingAlerts = [];
+        const today = new Date();
+        today.setHours(0,0,0,0);
+
+        Object.keys(plannerData).forEach(dateStr => {
+            const dayData = plannerData[dateStr];
+            if (dayData && dayData.tasks) {
+                dayData.tasks.forEach(task => {
+                    if (task.isDeadline && !task.completed) {
+                        const [y, m, d] = dateStr.split('-');
+                        const taskDate = new Date(y, m - 1, d);
+                        const diffTime = taskDate - today;
+                        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+                        
+                        if (diffDays >= 0 && diffDays <= 3) { // Show up to 3 days away in the panel as requested
+                            upcomingAlerts.push({
+                                task: task,
+                                dateStr: dateStr,
+                                diffDays: diffDays
+                            });
+                        }
+                    }
+                });
+            }
+        });
+
+        upcomingAlerts.sort((a, b) => a.diffDays - b.diffDays);
+
+        if (upcomingAlerts.length === 0) {
+            alertsPanel.style.display = 'none'; // Hide the panel completely
+            return;
+        } else {
+            alertsPanel.style.display = 'block'; // Show if there are alerts
+        }
+
+        upcomingAlerts.forEach(alertItem => {
+            const card = document.createElement('div');
+            card.classList.add('alert-card');
+            
+            let timeText = alertItem.diffDays === 0 ? "Bugün!" : `Son ${alertItem.diffDays} Gün`;
+            
+            // Format date nicely
+            const [y, m, d] = alertItem.dateStr.split('-');
+            const dateNice = `${d}.${m}.${y}`;
+
+            card.innerHTML = `
+                <div class="alert-title">${alertItem.task.text}</div>
+                <div class="alert-time">${timeText} <span style="color:#888; font-size:0.75rem; font-weight:normal;">(${dateNice})</span></div>
+            `;
+            alertsContainer.appendChild(card);
+        });
+    }
+
     // AI Analysis Logic
+    renderCalendar();
+    renderUpcomingDeadlines();
     const btnAiAnalyze = document.getElementById('btn-ai-analyze');
     const aiModal = document.getElementById('ai-modal');
     const closeAiModalBtn = document.getElementById('close-ai-modal');

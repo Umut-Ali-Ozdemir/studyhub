@@ -1051,9 +1051,9 @@ select:focus {
 /* --- CALENDAR PLANNER STYLES --- */
 .study-planner {
     background-color: var(--background-color);
-    padding: 2rem 5%;
+    padding: 2rem 2%;
     text-align: center;
-    max-width: 1200px;
+    max-width: 1600px;
     margin: 0 auto;
 }
 
@@ -1097,7 +1097,7 @@ select:focus {
 .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 10px;
+    gap: 8px;
     /* responsive min heights could be set */
 }
 
@@ -1105,8 +1105,8 @@ select:focus {
     background-color: #ffffff;
     border: none;
     border-radius: 16px;
-    min-height: 120px;
-    padding: 10px;
+    min-height: 100px;
+    padding: 8px;
     box-shadow: 0 4px 15px rgba(18, 52, 88, 0.05);
     cursor: pointer;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -1365,6 +1365,7 @@ select:focus {
 
 .add-task-form {
     display: flex;
+    flex-direction: column;
     gap: 10px;
 }
 
@@ -1449,4 +1450,127 @@ select:focus {
     transform: translateY(-2px);
     box-shadow: 0 6px 15px rgba(108, 92, 231, 0.4);
 }
+
+
+/* --- DEADLINE TRACKER LAYOUT --- */
+.planner-layout {
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.calendar-main {
+    width: 100%;
+}
+
+.deadline-alerts-panel {
+    position: absolute;
+    top: 0;
+    left: calc(100% + 20px);
+    width: 260px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 25px rgba(18, 52, 88, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.alerts-title {
+    color: #e74c3c;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    font-weight: 800;
+    text-align: left;
+    border-bottom: 2px solid rgba(231, 76, 60, 0.2);
+    padding-bottom: 0.5rem;
+}
+
+.no-alerts {
+    font-size: 0.95rem;
+    color: var(--primary-text);
+    opacity: 0.7;
+    text-align: left;
+}
+
+.alert-card {
+    background: #fff;
+    border-left: 4px solid #e74c3c;
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    margin-bottom: 10px;
+    text-align: left;
+    animation: fadeInAlert 0.5s ease-out;
+}
+
+@keyframes fadeInAlert {
+    from { opacity: 0; transform: translateX(10px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.alert-title {
+    font-weight: 700;
+    color: var(--primary-text);
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+}
+
+.alert-time {
+    font-size: 0.85rem;
+    color: #e74c3c;
+    font-weight: 600;
+}
+
+/* Calendar Deadline Indicators */
+.calendar-day.deadline-near {
+    border: 2px solid rgba(230, 126, 34, 0.5);
+}
+
+.calendar-day.deadline-urgent {
+    border: 2px solid #e74c3c;
+    box-shadow: 0 0 15px rgba(231, 76, 60, 0.2);
+}
+
+.task-dot.exam-dot {
+    background-color: #e74c3c !important;
+    box-shadow: 0 0 5px rgba(231, 76, 60, 0.5);
+}
+
+/* Task Form Updates */
+.task-input-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.deadline-checkbox-label {
+    font-size: 0.85rem;
+    color: #e74c3c;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+}
+
+.deadline-checkbox-label input {
+    cursor: pointer;
+    accent-color: #e74c3c;
+}
+
+/* Modal task list exam indicator */
+.task-item.is-exam {
+    border-left: 4px solid #e74c3c;
+}
+
+@media (max-width: 1250px) {
+    .deadline-alerts-panel {
+        position: static;
+        width: 100%;
+        margin-top: 20px;
+    }
+}
+
 
