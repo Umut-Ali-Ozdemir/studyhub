@@ -1,0 +1,1049 @@
+:root {
+    --background-color: rgb(241, 239, 236);
+    --secondary-background: rgb(212, 201, 190);
+    --primary-text: rgb(18, 52, 88);
+    --dark-accent: rgb(3, 3, 3);
+    --transition-speed: 0.3s;
+}
+
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+
+
+main {
+  flex: 1 0 auto;  /* main içeriğin büyümesini sağlar */
+}
+
+footer {
+  flex-shrink: 0;  /* footer küçülmez, hep en altta kalır */
+}
+/* Body */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--background-color);
+    color: var(--primary-text);
+    line-height: 1.6;
+    margin: 0;
+
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+
+    padding-top: 80px; /* Navbar yüksekliği kadar boşluk (ayarlanabilir) */
+}
+
+
+
+/* Navigation Bar */
+.main-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    width: 100%;
+    box-sizing: border-box;
+    background-color: rgba(241, 239, 236, 0.95); /* var(--background-color) şeffaf */
+    backdrop-filter: blur(4px); /* modern şeffaflık efekti */   
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08); /* alt çizgi daha yumuşak */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06); /* daha derin gölge */
+    padding: 1rem 5%;
+    color: var(--primary-text);
+    display: flex;
+    justify-content: space-between;  /* değişmedi */
+    align-items: center;
+    transition: background-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+}
+
+.logo {
+    color: var(--primary-text);
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    font-size: 1.75rem;
+    cursor: pointer;
+    transition: transform var(--transition-speed) ease;
+    user-select: none; /* Seçilemeyi engeller */
+}
+
+.logo:hover {
+    transform: scale(1.05);
+}
+
+
+
+/* Yeni eklenen sağdaki kapsayıcı: nav-links + auth-buttons'ı birlikte tutacak */
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.auth-buttons {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.auth-buttons a {
+    text-decoration: none;
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.btn-login {
+    color: var(--primary-text);
+    border: 1px solid var(--primary-text);
+    background-color: transparent;
+}
+
+.btn-login:hover {
+    background-color: var(--primary-text);
+    color: var(--background-color);
+}
+
+.btn-signup {
+    background-color: var(--primary-text);
+    color: var(--background-color);
+}
+
+.btn-signup:hover {
+    background-color: var(--dark-accent);
+}
+
+/* Nav links - margin kaldırıldı, gap ile aralık verildi */
+.nav-links {
+    display: flex;
+    list-style: none;
+    gap: 1.75rem;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-links li {
+    margin: 0;
+}
+
+.nav-links a {
+    color: var(--primary-text);
+    text-decoration: none;
+    font-weight: 600;
+    position: relative;
+    transition: color var(--transition-speed) ease;
+}
+
+.nav-links a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -5px;
+    left: 0;
+    background-color: var(--primary-text);
+    transition: width var(--transition-speed) ease;
+    border-radius: 2px;
+}
+
+.nav-links a:hover {
+    color: var(--dark-accent);
+}
+
+.nav-links a:hover::after {
+    width: 100%;
+}
+
+/* Mobile Nav Toggle */
+.nav-toggle {
+    display: none;
+    flex-direction: column;
+    cursor: pointer;
+    width: 28px;
+    height: 22px;
+    justify-content: space-between;
+}
+
+.nav-toggle span {
+    height: 3px;
+    width: 100%;
+    background-color: var(--primary-text);
+    border-radius: 2px;
+    transition: all var(--transition-speed) ease;
+}
+
+.nav-toggle:hover span {
+    background-color: var(--dark-accent);
+}
+
+/* Hero Section */
+.hero {
+    background: linear-gradient(135deg, var(--primary-text), var(--secondary-background));
+    color: var(--background-color);
+    text-align: center;
+    padding: 8rem 2rem;
+    user-select: none;
+}
+
+
+.hero-content h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    text-shadow: 1px 1px 6px rgba(0,0,0,0.15);
+}
+
+.hero-content p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    font-weight: 500;
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.1);
+}
+
+.hero .subtext {
+  font-size: 1rem;
+  max-width: 600px;
+  margin: 0 auto 2rem auto;
+  color: rgba(255, 255, 255, 0.85); /* biraz daha soluk, ikincil yazı rengi */
+  line-height: 1.6;
+}
+
+.cta-button {
+    display: inline-block;
+    background-color: var(--background-color);
+    color: var(--primary-text);
+    padding: 0.85rem 2rem;
+    font-weight: 700;
+    border-radius: 35px;
+    text-decoration: none;
+    box-shadow: 0 8px 15px rgba(212, 201, 190, 0.4);
+    transition: all var(--transition-speed) ease;
+    user-select: none;
+}
+
+.cta-button:hover {
+    background-color: var(--primary-text);
+    color: var(--background-color);
+    box-shadow: 0 12px 20px rgba(3,3,3,0.4);
+    transform: translateY(-4px);
+}
+
+/* Features Section */
+.features {
+    display: flex;
+    justify-content: space-around;
+    padding: 3rem 5%;
+    background-color: var(--background-color);
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.feature {
+    background-color: var(--secondary-background);
+    border-radius: 12px;
+    padding: 2rem 1.5rem;
+    max-width: 300px;
+    flex: 1 1 280px;
+    box-shadow: 0 4px 8px rgba(18, 52, 88, 0.08);
+    transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+    cursor: default;
+    user-select: none;
+}
+
+.feature:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 14px 24px rgba(18, 52, 88, 0.18);
+}
+
+.feature h2 {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    color: var(--dark-accent);
+}
+
+.feature p {
+    font-size: 1rem;
+    color: var(--primary-text);
+}
+
+/* Notes & Exams Sections - Filters */
+.notes-filter,
+.exam-filters {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.filter-dropdown,
+.search-input {
+    background-color: var(--background-color);
+    border: 1.8px solid var(--secondary-background);
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: var(--primary-text);
+    box-shadow: inset 0 2px 4px rgba(212, 201, 190, 0.7);
+    transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+    flex: 1 1 250px;
+    min-width: 200px;
+    user-select: none;
+}
+
+.filter-dropdown:focus,
+.search-input:focus,
+input[type="text"]:focus,
+select:focus {
+    outline: none;
+    border-color: var(--primary-text);
+    box-shadow: 0 0 8px 2px rgba(18, 52, 88, 0.25);
+}
+
+/* Notes & Exams Grid */
+.notes-grid,
+.exam-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2rem;
+}
+
+/* Cards */
+.note-card,
+.exam-card {
+    background-color: var(--background-color);
+    border: 1.5px solid var(--secondary-background);
+    border-radius: 10px;
+    padding: 1.5rem 1.25rem;
+    box-shadow: 0 3px 6px rgba(18, 52, 88, 0.07);
+    transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+    display: flex;
+    flex-direction: column;
+    user-select: none;
+}
+
+.note-card:hover,
+.exam-card:hover {
+    transform: translateY(-7px);
+    box-shadow: 0 15px 30px rgba(18, 52, 88, 0.18);
+}
+
+.note-card h3,
+.exam-card h3 {
+    margin-bottom: 0.8rem;
+    color: var(--dark-accent);
+}
+
+.note-details,
+.exam-details {
+    font-size: 0.9rem;
+    color: var(--primary-text);
+    margin-bottom: 1.1rem;
+    font-weight: 500;
+    user-select: text;
+}
+
+/* Download Buttons */
+.download-btn,
+.exam-download-btn {
+    align-self: flex-start;
+    background-color: var(--primary-text);
+    color: var(--background-color);
+    border: none;
+    padding: 0.55rem 1.2rem;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 6px 10px rgba(18, 52, 88, 0.15);
+    transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease;
+    user-select: none;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.download-btn:hover,
+.exam-download-btn:hover {
+    background-color: var(--dark-accent);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(3, 3, 3, 0.25);
+}
+
+/* Upload Sections */
+.upload-section,
+.upload-exam-section {
+    background-color: var(--secondary-background);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: inset 0 2px 5px rgba(18, 52, 88, 0.1);
+    user-select: none;
+}
+
+.upload-section h3,
+.upload-exam-section h3 {
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+    color: var(--dark-accent);
+}
+
+/* Upload Forms */
+.upload-section form,
+.upload-exam-section form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.upload-section select,
+.upload-exam-section select,
+.upload-section input[type="text"],
+.upload-exam-section input[type="text"],
+.upload-section input[type="file"],
+.upload-exam-section input[type="file"] {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    border: 1.8px solid var(--secondary-background);
+    background-color: var(--background-color);
+    color: var(--primary-text);
+    font-size: 1rem;
+    box-shadow: inset 0 2px 5px rgba(212, 201, 190, 0.6);
+    transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+}
+
+.upload-section select:focus,
+.upload-exam-section select:focus,
+.upload-section input[type="text"]:focus,
+.upload-exam-section input[type="text"]:focus {
+    outline: none;
+    border-color: var(--primary-text);
+    box-shadow: 0 0 9px 3px rgba(18, 52, 88, 0.22);
+}
+
+/* Upload Buttons */
+.upload-btn {
+    background-color: var(--primary-text);
+    color: var(--background-color);
+    padding: 0.9rem 1.8rem;
+    font-weight: 700;
+    border-radius: 35px;
+    border: none;
+    cursor: pointer;
+    align-self: flex-start;
+    box-shadow: 0 8px 15px rgba(18, 52, 88, 0.25);
+    transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease;
+    user-select: none;
+}
+
+.upload-btn:hover {
+    background-color: var(--dark-accent);
+    transform: translateY(-4px);
+    box-shadow: 0 14px 24px rgba(3, 3, 3, 0.35);
+}
+
+/* Study Planner Section */
+.study-planner {
+    background-color: var(--background-color);
+    padding: 4rem 5%;
+    text-align: center;
+}
+
+.study-planner h2 {
+    color: var(--dark-accent);
+    margin-bottom: 1rem;
+    font-size: 2rem;
+}
+
+.study-planner p {
+    color: var(--primary-text);
+    font-size: 1.1rem;
+}
+
+
+
+
+
+.main-footer {
+  background-color: var(--secondary-background);
+  padding: 3rem 4rem;
+  color: var(--primary-text);
+  font-size: 1rem;                /* Yazı boyutu biraz artırıldı */
+  display: flex;
+  gap: 3rem;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  width: 100%;
+  box-sizing: border-box;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  align-items: flex-start;
+}
+
+.footer-left, .footer-middle, .footer-right {
+  flex: 1 1 33.333%;
+  min-width: 200px;
+  box-sizing: border-box;
+  padding: 0 1rem;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Başlıkları büyüttüm */
+.main-footer h3, .main-footer h4 {
+  color: var(--dark-accent);
+  margin-bottom: 1.2rem;
+  font-weight: 800;
+  font-size: 1.6rem;          /* Başlık font büyüklüğü artırıldı */
+}
+
+/* Quick Links 2 sütun, biraz daha bol boşluk */
+.quick-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  max-width: 260px;          /* biraz genişlettim */
+}
+
+.quick-links li {
+  width: 50%;
+  margin-bottom: 0.75rem;    /* alt boşluk biraz artırıldı */
+}
+
+.quick-links a {
+  text-decoration: none;
+  color: var(--primary-text);
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.quick-links a:hover {
+  color: var(--dark-accent);
+}
+
+/* Data Security kutusu biraz daha geniş ve üstten daha fazla boşluk */
+.data-security {
+  background-color: var(--background-color);
+  border-radius: 8px;
+  padding: 1rem 1.2rem;
+  box-shadow: 0 2px 6px rgba(18, 52, 88, 0.08);
+  color: var(--primary-text);
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-top: 2rem;
+  max-width: 320px;
+  text-align: left;
+}
+
+/* Contact form genişliği biraz artırıldı */
+.footer-form {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Input ve textarea font büyüklüğü artırıldı, padding artırıldı */
+.footer-form input,
+.footer-form textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--secondary-background);
+  background-color: var(--background-color);
+  color: var(--primary-text);
+  font-size: 1rem;
+  resize: vertical;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+.footer-form input:focus,
+.footer-form textarea:focus {
+  outline: none;
+  border-color: var(--primary-text);
+  box-shadow: 0 0 6px rgba(18, 52, 88, 0.3);
+}
+
+/* Buton daha büyük ve belirgin */
+.footer-form button {
+  background-color: var(--primary-text);
+  color: var(--background-color);
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color var(--transition-speed) ease, transform 0.2s ease;
+  width: fit-content;
+  align-self: flex-start;
+  font-size: 1.1rem;
+  font-weight: 700;
+  box-shadow: 0 4px 8px rgba(18, 52, 88, 0.15);
+}
+
+.footer-form button:hover {
+  background-color: var(--dark-accent);
+  transform: translateY(-2px);
+}
+
+/* Responsive ayarlarda da form geniş ve okunaklı */
+@media (max-width: 900px) {
+  .footer-form {
+    max-width: 100%;
+    margin-bottom: 2rem;
+  }
+  .footer-form button {
+    width: 100%;
+    align-self: center;
+  }
+}
+
+/* Sosyal medya ikonları görünümü zaten iyi, koruyabiliriz */
+
+/* Footer Bottom */
+.footer-bottom {
+  background-color: #000;
+  color: #fff;
+  text-align: center;
+  padding: 1rem 0;
+  font-size: 0.9rem;
+  letter-spacing: 0.03em;
+  width: 100%;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+
+/* Sosyal medya ikonları */
+.social-media {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center; /* orta hizala */
+  gap: 1rem;
+}
+
+.social-media a {
+  color: var(--primary-text);
+  font-size: 1.3rem;
+  transition: color 0.3s ease;
+  text-decoration: none;
+}
+
+.social-media a:hover {
+  color: var(--dark-accent);
+}
+
+
+
+
+
+
+
+/* Responsive Styles */
+@media screen and (max-width: 768px) {
+    .nav-toggle {
+        display: flex;
+    }
+
+    .nav-links {
+        position: absolute;
+        top: 62px;
+        left: 0;
+        width: 100%;
+        background-color: var(--background-color);
+        flex-direction: column;
+        border-top: 1.5px solid var(--secondary-background);
+        box-shadow: 0 8px 15px rgba(18, 52, 88, 0.15);
+        display: none;
+        z-index: 999;
+    }
+
+    .nav-links.show {
+        display: flex;
+    }
+
+    .nav-links li {
+        margin: 1rem 0;
+        text-align: center;
+    }
+
+    .features {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .feature {
+        margin-bottom: 1.5rem;
+    }
+
+    .notes-filter,
+    .exam-filters {
+        flex-direction: column;
+    }
+
+    .filter-dropdown,
+    .search-input {
+        width: 100%;
+    }
+}
+
+
+/* Mobil menü açıkken .nav-links görünür olur */
+.nav-links.show {
+    display: flex !important;
+    flex-direction: column;
+    position: absolute;
+    top: 60px; /* Menü yüksekliğine göre ayarla */
+    left: 0;
+    width: 100%;
+    background-color: var(--background-color);
+    border-top: 1px solid var(--secondary-background);
+    padding: 1rem 0;
+    z-index: 1000;
+}
+
+/* Menü elemanları mobilde daha uygun görünür */
+.nav-links.show li {
+    margin: 1rem 0;
+    text-align: center;
+}
+
+
+.note-card,
+.exam-card,
+.feature {
+    background-color: var(--background-color);
+    border: 1px solid var(--secondary-background);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    will-change: transform;
+}
+
+.note-card:hover,
+.exam-card:hover,
+.feature:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 8px 20px rgba(18, 52, 88, 0.15);
+}
+
+
+.fade-in {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+
+.cta-button:active,
+.upload-btn:active,
+.download-btn:active {
+    transform: scale(0.96);
+    box-shadow: 0 3px 6px rgba(3, 3, 3, 0.2);
+}
+
+/* --- SENİN ESKİ CSS’NİN TAMAMI --- */
+/* ... Eski CSS kodların olduğu kısım değişmeden kalacak ... */
+
+/* Eklenen ana sayfa bölümleri için ek stil */
+/* Testimonial bölümü */
+.testimonials {
+  background-color: var(--secondary-background);
+  padding: 2.5rem 1rem;
+  border-radius: 10px;
+  margin: 3rem 0;
+  text-align: center;
+}
+
+.testimonial-list {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.testimonial {
+  background-color: var(--background-color);
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 6px 12px rgba(18, 52, 88, 0.1);
+  max-width: 300px;
+}
+
+.testimonial p {
+  font-style: italic;
+  margin-bottom: 1rem;
+}
+
+.testimonial span {
+  font-weight: 600;
+  color: var(--primary-text);
+}
+
+/* Haber listesi */
+.news {
+  margin-bottom: 3rem;
+  text-align: center;
+}
+
+.news-list {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  font-size: 1.1rem;
+  color: var(--primary-text);
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* Container sınıfı eklenmişse, ona max genişlik ve padding */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+
+.news h3,
+.updates h3 {
+  font-size: 1.6rem;
+  color: var(--primary-text);
+  margin-bottom: 1rem;
+  font-weight: 700;
+  border-bottom: 2px solid var(--primary-text);
+  display: inline-block;
+  padding-bottom: 0.3rem;
+}
+
+.news-list li,
+.updates-list li {
+  position: relative;
+  padding-left: 25px;
+  margin-bottom: 0.7rem;
+  font-size: 1.1rem;
+  color: var(--primary-text);
+  cursor: default;
+}
+
+/* Küçük ok ikonu (SVG veya Unicode kullanabiliriz) */
+.news-list li::before,
+.updates-list li::before {
+  content: "➔"; /* Unicode ok işareti */
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--secondary-background);
+  font-size: 1.3rem;
+  line-height: 1;
+  user-select: none;
+}
+
+/* Listelerin arasına hafif çizgi */
+.news-list li:not(:last-child),
+.updates-list li:not(:last-child) {
+  border-bottom: 1px solid var(--secondary-background);
+  padding-bottom: 0.5rem;
+}
+
+/* Updates bölüm ufak padding ve aralık */
+.updates {
+  margin-top: 2rem;
+  background-color: var(--background-color);
+  border: 1px solid var(--secondary-background);
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Responsive de liste font boyutu */
+@media screen and (max-width: 768px) {
+  .news-list li,
+  .updates-list li {
+    font-size: 1rem;
+  }
+}
+
+/* Features container: 3 kutu yan yana, aralarında eşit boşluk */
+.features {
+  max-width: 960px;                 /* genişlik sınırı */
+  margin: 3rem auto 3rem auto;      /* üst ve alt boşluk, sayfa ortasında */
+  padding: 0 1rem;                  /* yandan boşluk */
+  display: flex !important;         /* kesin flex yap, !important ekledim */
+  justify-content: center;          /* kutuları ortala */
+  gap: 3rem;                       /* kutular arası boşluk */
+  flex-wrap: nowrap;                /* tek satırda kalacak */
+}
+
+/* Features içindeki her kutu */
+.feature {
+  background-color: var(--background-color);
+  border: 1px solid var(--secondary-background);
+  padding: 1.5rem;
+  border-radius: 8px;
+  text-align: center;
+  width: 280px;                    /* sabit genişlik */
+  transition: transform 0.3s ease;
+  box-sizing: border-box;
+  flex-shrink: 0;                 /* kutular küçülmesin */
+}
+
+.feature:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(18, 52, 88, 0.1);
+}
+
+/* Testimonials ana kapsayıcı */
+.testimonials {
+  background-color: var(--secondary-background);
+  padding: 2rem 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(18, 52, 88, 0.1);
+  max-width: 960px;
+  margin: 0 auto 4rem auto;      /* sayfada ortalanmış, alt boşluk */
+  color: var(--primary-text);
+}
+
+/* Testimonials başlık */
+.testimonials h2 {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  letter-spacing: 1px;
+  color: var(--dark-accent);
+}
+
+.feature-icon {
+  font-size: 2rem;
+  color: var(--primary-text);
+  margin-bottom: 0.3rem;
+}
+
+
+
+
+.about,
+.why-studyhub {
+  background-color: var(--background-color);
+  padding: 2rem 1.5rem;
+  max-width: var(--max-width);
+  margin: 0 auto 4rem auto;
+  color: var(--primary-text);
+  text-align: center;
+}
+
+.about h2,
+.why-studyhub h2 {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  color: var(--dark-accent);
+}
+
+.about p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.why-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 1rem;
+}
+
+.why-list li {
+  font-size: 1.05rem;
+  margin: 0.6rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  color: var(--primary-text);
+}
+
+
+
+
+
+.join-us,
+.security,
+.popular-courses {
+  text-align: center;
+  margin: 4rem auto;
+  padding: 2rem 1.5rem;
+  background-color: var(--secondary-background);
+  border-radius: 10px;
+  max-width: 960px;
+  box-shadow: 0 4px 8px rgba(18, 52, 88, 0.05);
+}
+
+.join-us h2,
+.security h2,
+.popular-courses h2 {
+  color: var(--dark-accent);
+  margin-bottom: 1rem;
+  font-size: 1.75rem;
+}
+
+.join-us p,
+.security p {
+  font-size: 1rem;
+  color: var(--primary-text);
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.course-grid {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+}
+
+.course-card {
+  background-color: var(--background-color);
+  border: 1px solid var(--secondary-background);
+  padding: 1.5rem;
+  border-radius: 8px;
+  width: 240px;
+  box-shadow: 0 2px 6px rgba(18, 52, 88, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.course-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(18, 52, 88, 0.15);
+}
+
+.course-card h3 {
+  color: var(--primary-text);
+  margin-bottom: 0.5rem;
+}
+
+.course-card p {
+  color: var(--dark-accent);
+  font-weight: 600;
+}
+
+

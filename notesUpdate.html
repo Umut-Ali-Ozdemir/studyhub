@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notes</title>
+  <style>
+    :root {
+      --primary-text: #2c2c2c;
+      --background-color: #ffffff;
+      --dark-accent: #222;
+      --transition-speed: 0.3s;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: var(--background-color);
+    }
+
+    .main-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      width: 100%;
+      box-sizing: border-box;
+      background-color: rgba(241, 239, 236, 0.95);
+      backdrop-filter: blur(4px);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+      padding: 1rem 5%;
+      color: var(--primary-text);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+    }
+
+    .logo {
+      color: var(--primary-text);
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      font-size: 1.75rem;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .logo:hover {
+      transform: scale(1.05);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .nav-links {
+      display: flex;
+      list-style: none;
+      gap: 1.75rem;
+      margin: 0;
+      padding: 0;
+    }
+
+    .nav-links a {
+      color: var(--primary-text);
+      text-decoration: none;
+      font-weight: 600;
+      position: relative;
+      transition: color var(--transition-speed) ease;
+    }
+
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: -5px;
+      left: 0;
+      background-color: var(--primary-text);
+      transition: width var(--transition-speed) ease;
+      border-radius: 2px;
+    }
+
+    .nav-links a:hover {
+      color: var(--dark-accent);
+    }
+
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+
+    .auth-buttons {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .auth-buttons a {
+      text-decoration: none;
+      padding: 0.4rem 0.9rem;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .btn-login {
+      color: var(--primary-text);
+      border: 1px solid var(--primary-text);
+      background-color: transparent;
+    }
+
+    .btn-login:hover {
+      background-color: var(--primary-text);
+      color: var(--background-color);
+    }
+
+    .btn-signup {
+      background-color: var(--primary-text);
+      color: var(--background-color);
+    }
+
+    .btn-signup:hover {
+      background-color: var(--dark-accent);
+    }
+
+    .nav-toggle {
+      display: none;
+    }
+
+    main {
+      padding: 6rem 5% 2rem;
+    }
+
+    .notes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .note-card {
+      background: #f8f8f8;
+      padding: 1.2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      transition: transform 0.2s ease;
+    }
+
+    .note-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .note-card h3 {
+      margin-top: 0;
+    }
+
+    .note-card p {
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <nav class="main-nav">
+      <div class="logo">StudyHub</div>
+      <div class="nav-right">
+        <ul class="nav-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="notes.html" class="active">Notes</a></li>
+          <li><a href="exams.html">Exam Archive</a></li>
+          <li><a href="planner.html">Study Planner</a></li>
+        </ul>
+        <div class="auth-buttons">
+          <a href="login.html" class="btn-login">Login</a>
+          <a href="signup.html" class="btn-signup">Sign Up</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Shared Notes</h1>
+    <div class="notes-grid">
+      <div class="note-card">
+        <h3>Calculus - Week 1</h3>
+        <p>Limits and Continuity notes.</p>
+      </div>
+      <div class="note-card">
+        <h3>Physics - Kinematics</h3>
+        <p>Equations of motion summary.</p>
+      </div>
+      <div class="note-card">
+        <h3>Data Structures</h3>
+        <p>Stacks, Queues, Linked Lists.</p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const toggle = document.querySelector('.nav-toggle');
+    const navLinks = document.querySelector('.nav-links');
+
+    if (toggle) {
+      toggle.addEventListener('click', () => {
+        navLinks.classList.toggle('active');
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Exam Archive - Student Study Hub</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<nav class="main-nav">
+  <div class="logo">StudyHub</div>
+
+  <div class="nav-right">
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="notes.html">Notes</a></li>
+      <li><a href="exams.html" class="active">Exam Archive</a></li>
+      <li><a href="planner.html">Study Planner</a></li>
+    </ul>
+
+    <div class="auth-buttons">
+      <a href="login.html" class="btn-login">Giriş Yap</a>
+      <a href="register.html" class="btn-signup">Kayıt Ol</a>
+    </div>
+  </div>
+
+  <div class="nav-toggle">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</nav>
+
+
+
+  <main>
+    <section class="exam-archive container">
+      <h2>Exam Archive</h2>
+
+      <div class="exam-filters">
+        <select id="course-filter" class="filter-dropdown">
+          <option value="">All Courses</option>
+          <option value="math">Mathematics</option>
+          <option value="cs">Computer Science</option>
+          <option value="physics">Physics</option>
+          <option value="biology">Biology</option>
+        </select>
+
+        <select id="exam-type-filter" class="filter-dropdown">
+          <option value="">All Exam Types</option>
+          <option value="midterm">Midterm</option>
+          <option value="final">Final</option>
+          <option value="resit">Resit</option>
+          <option value="quiz">Quiz</option>
+        </select>
+
+        <input type="text" id="exam-search" placeholder="Search exams" class="search-input" />
+      </div>
+
+      <div class="exam-grid">
+        <!-- Dynamic exams here -->
+      </div>
+
+      <div class="upload-exam-section">
+        <h3>Upload Exam Paper</h3>
+        <form id="exam-upload-form">
+          <div class="form-group">
+            <select id="upload-university" required>
+              <option value="">Select University</option>
+              <option value="mit">MIT</option>
+              <option value="harvard">Harvard</option>
+              <option value="stanford">Stanford</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <select id="upload-course" required>
+              <option value="">Select Course</option>
+              <option value="math">Mathematics</option>
+              <option value="cs">Computer Science</option>
+              <option value="physics">Physics</option>
+              <option value="biology">Biology</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <select id="upload-exam-type" required>
+              <option value="">Exam Type</option>
+              <option value="midterm">Midterm</option>
+              <option value="final">Final</option>
+              <option value="resit">Resit</option>
+              <option value="quiz">Quiz</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <input type="text" id="exam-title" placeholder="Exam Title" required />
+          </div>
+          <div class="form-group">
+            <input type="text" id="exam-topic" placeholder="Topic/Subject" required />
+          </div>
+          <div class="form-group">
+            <input type="file" id="exam-file" accept=".pdf" required />
+          </div>
+          <button type="submit" class="upload-btn">Upload Exam</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+<footer>
+  <div class="main-footer">
+    <div class="footer-left">
+      <h3>Quick Links</h3>
+      <ul class="quick-links">
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="notes.html">Notes</a></li>
+        <li><a href="exams.html">Exam Archive</a></li>
+        <li><a href="planner.html">Study Planner</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="privacy.html">Privacy Policy</a></li>
+      </ul>
+      
+    </div>
+
+    <div class="footer-middle">
+      <h3>StudyHub</h3>
+      <p>
+        Streamline your academic journey with us. We provide tools and resources to make your studies easier and more effective.
+      </p>
+      <div class="social-media" aria-label="Social Media Links">
+        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+      </div>
+
+      
+    </div>
+
+    <div class="footer-right">
+      <h3>Contact & Support</h3>
+      <form class="footer-form" onsubmit="return false;">
+        <input type="text" placeholder="Your Name" required maxlength="50" />
+        <input type="email" placeholder="Your Email" required maxlength="50" />
+        <textarea rows="3" placeholder="Your Message" maxlength="300"></textarea>
+        <button type="submit">Send</button>
+      </form>
+    </div>
+</div>
+
+  <div class="footer-bottom">
+    © 2025 StudyHub. All rights reserved by Umut Ali Özdemir.
+  </div>
+</footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
