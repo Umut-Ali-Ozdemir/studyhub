@@ -170,9 +170,18 @@ body {
     display: none;
     flex-direction: column;
     cursor: pointer;
-    width: 28px;
-    height: 22px;
+    width: 44px;
+    height: 44px;
+    padding: 10px 8px;
+    border: 0;
+    background: transparent;
+    flex-shrink: 0;
     justify-content: space-between;
+}
+
+.nav-toggle:focus-visible {
+    outline: 2px solid var(--primary-text);
+    outline-offset: 3px;
 }
 
 .nav-toggle span {
@@ -659,9 +668,9 @@ select:focus {
         display: flex;
     }
 
-    .nav-links {
+    .main-nav .nav-right {
         position: absolute;
-        top: 62px;
+        top: 100%;
         left: 0;
         width: 100%;
         background-color: var(--background-color);
@@ -670,15 +679,32 @@ select:focus {
         box-shadow: 0 8px 15px rgba(18, 52, 88, 0.15);
         display: none;
         z-index: 999;
+        align-items: stretch;
+        gap: 1rem;
+        padding: 1rem 5%;
+        max-height: calc(100vh - 100%);
+        max-height: calc(100dvh - 100%);
+        overflow-y: auto;
     }
 
-    .nav-links.show {
+    .main-nav .nav-right.show {
         display: flex;
     }
 
-    .nav-links li {
-        margin: 1rem 0;
+    .main-nav .nav-links {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .main-nav .nav-links a {
+        display: block;
+        padding: 0.75rem;
         text-align: center;
+    }
+
+    .main-nav .auth-buttons {
+        justify-content: center;
+        flex-wrap: wrap;
     }
 
     .features {
@@ -699,27 +725,6 @@ select:focus {
     .search-input {
         width: 100%;
     }
-}
-
-
-/* Mobil menü açıkken .nav-links görünür olur */
-.nav-links.show {
-    display: flex !important;
-    flex-direction: column;
-    position: absolute;
-    top: 60px; /* Menü yüksekliğine göre ayarla */
-    left: 0;
-    width: 100%;
-    background-color: var(--background-color);
-    border-top: 1px solid var(--secondary-background);
-    padding: 1rem 0;
-    z-index: 1000;
-}
-
-/* Menü elemanları mobilde daha uygun görünür */
-.nav-links.show li {
-    margin: 1rem 0;
-    text-align: center;
 }
 
 

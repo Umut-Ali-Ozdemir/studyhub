@@ -1,7 +1,48 @@
-document.querySelector('.nav-toggle').addEventListener('click', () => {
-    const navLinks = document.querySelector('.nav-links');
-    navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
-});
+function initNavbar() {
+    const navbar = document.querySelector('.main-nav');
+    if (!navbar) return;
+
+    const toggle = navbar.querySelector('.nav-toggle');
+    const navigation = navbar.querySelector('.nav-right');
+    if (!toggle || !navigation) return;
+
+    const mobileViewport = window.matchMedia('(max-width: 768px)');
+
+    function setMenuOpen(isOpen) {
+        navigation.classList.toggle('show', isOpen);
+        toggle.setAttribute('aria-expanded', String(isOpen));
+    }
+
+    setMenuOpen(false);
+
+    toggle.addEventListener('click', () => {
+        if (mobileViewport.matches) {
+            setMenuOpen(toggle.getAttribute('aria-expanded') !== 'true');
+        }
+    });
+
+    navbar.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+            setMenuOpen(false);
+            toggle.focus();
+        }
+    });
+
+    navigation.addEventListener('click', (event) => {
+        if (event.target.closest('a')) setMenuOpen(false);
+    });
+
+    document.addEventListener('click', (event) => {
+        if (!navbar.contains(event.target)) setMenuOpen(false);
+    });
+
+    mobileViewport.addEventListener('change', () => {
+        setMenuOpen(false);
+        if (mobileViewport.matches && navigation.contains(document.activeElement)) {
+            toggle.focus();
+        }
+    });
+}
 
 // Sample notes data (in a real app, this would come from a backend)
 const sampleNotes = [
@@ -184,6 +225,7 @@ function initExamArchivePage() {
 
 // Run initializations when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+    initNavbar();
     initNotesPage();
     initExamArchivePage();
     initStudyPlanner(); // Initialize planner if on planner page
