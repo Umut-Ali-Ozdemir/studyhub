@@ -2,6 +2,9 @@
 (() => {
     const storageKey = 'studyHubTheme';
     const systemTheme = window.matchMedia('(prefers-color-scheme: dark)');
+    const labels = document.documentElement.lang.toLowerCase().startsWith('tr')
+        ? { name: 'Koyu tema', light: 'Açık temaya geç', dark: 'Koyu temaya geç' }
+        : { name: 'Dark theme', light: 'Switch to light theme', dark: 'Switch to dark theme' };
     let preference = null;
 
     function validTheme(value) {
@@ -18,9 +21,9 @@
         const theme = preference || (systemTheme.matches ? 'dark' : 'light');
         document.documentElement.dataset.theme = theme;
         document.querySelectorAll('.theme-toggle').forEach(button => {
-            const label = theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
+            const label = theme === 'dark' ? labels.light : labels.dark;
             button.setAttribute('aria-pressed', String(theme === 'dark'));
-            button.setAttribute('aria-label', 'Dark theme');
+            button.setAttribute('aria-label', labels.name);
             button.title = label;
         });
     }

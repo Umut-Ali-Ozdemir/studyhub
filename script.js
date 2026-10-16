@@ -48,35 +48,90 @@ function initNavbar() {
 const sampleNotes = [
     {
         id: 1,
-        title: "Calculus Derivatives",
+        title: "Kalkülüs: Türevler",
+        originalTitle: "Calculus Derivatives",
         course: "math",
         author: "John Doe",
-        downloadUrl: "#"
+        fileType: "PDF"
     },
     {
         id: 2,
-        title: "Machine Learning Basics",
+        title: "Makine Öğrenmesine Giriş",
+        originalTitle: "Machine Learning Basics",
         course: "cs",
         author: "Jane Smith",
-        downloadUrl: "#"
+        fileType: "PDF"
     }
 ];
+
+const noteCourseNames = {
+    math: 'Matematik',
+    cs: 'Bilgisayar Bilimleri',
+    physics: 'Fizik',
+    biology: 'Biyoloji'
+};
 
 // Notes rendering function
 function renderNotes(notes) {
     const notesGrid = document.querySelector('.notes-grid');
+    if (!notesGrid) return;
     notesGrid.innerHTML = ''; // Clear existing notes
 
+    const resultsCount = document.getElementById('notes-results-count');
+    if (resultsCount) {
+        resultsCount.textContent = notes.length === 0
+            ? 'Eşleşen not yok'
+            : `${notes.length} örnek not gösteriliyor`;
+    }
+
+    function createElement(tag, className, text) {
+        const element = document.createElement(tag);
+        if (className) element.className = className;
+        if (text) element.textContent = text;
+        return element;
+    }
+
+    if (notes.length === 0) {
+        const emptyState = createElement('div', 'notes-empty');
+        emptyState.appendChild(createElement('span', 'notes-empty-label', 'SONUÇ BULUNAMADI'));
+        emptyState.appendChild(createElement('h3', '', 'Aramana uygun bir not yok.'));
+        emptyState.appendChild(createElement('p', '', 'Başka bir başlık ara veya ders filtresini değiştir. Tüm notları görmek için arama alanını boşaltıp “Tüm dersler” seçeneğini seçebilirsin.'));
+        notesGrid.appendChild(emptyState);
+        return;
+    }
+
     notes.forEach(note => {
-        const noteCard = document.createElement('div');
-        noteCard.classList.add('note-card');
-        noteCard.innerHTML = `
-            <h3>${note.title}</h3>
-            <p class="note-details">Course: ${note.course.toUpperCase()} | By ${note.author}</p>
-            <a href="${note.downloadUrl}" class="download-btn" download>
-              <span class="download-icon">⬇️</span> Download PDF
-            </a>
-        `;
+        const noteCard = createElement('article', 'note-card');
+        const headingId = `note-title-${note.id}`;
+        noteCard.setAttribute('aria-labelledby', headingId);
+
+        const topRow = createElement('div', 'notes-card-top');
+        topRow.appendChild(createElement('span', 'notes-file-type', note.fileType));
+        topRow.appendChild(createElement('span', 'notes-demo-tag', 'Örnek not'));
+        noteCard.appendChild(topRow);
+
+        const title = createElement('h3', 'notes-card-title', note.title);
+        title.id = headingId;
+        noteCard.appendChild(title);
+
+        const details = createElement('dl', 'notes-card-details');
+        [['Ders', noteCourseNames[note.course] || note.course], ['Örnek paylaşan', note.author]].forEach(([label, value]) => {
+            const row = createElement('div');
+            row.appendChild(createElement('dt', '', label));
+            row.appendChild(createElement('dd', '', value));
+            details.appendChild(row);
+        });
+        noteCard.appendChild(details);
+
+        const availability = createElement('p', 'notes-card-availability', 'Demo kaydı. İndirilebilir bir PDF dosyası bulunmuyor.');
+        availability.id = `note-availability-${note.id}`;
+        noteCard.appendChild(availability);
+
+        const downloadButton = createElement('button', 'button button-secondary notes-download', 'PDF indir');
+        downloadButton.type = 'button';
+        downloadButton.disabled = true;
+        downloadButton.setAttribute('aria-describedby', availability.id);
+        noteCard.appendChild(downloadButton);
         notesGrid.appendChild(noteCard);
     });
 }
@@ -85,11 +140,16 @@ function renderNotes(notes) {
 function filterNotes() {
     const courseSelect = document.getElementById('course-select');
     const searchInput = document.getElementById('search-notes');
+    if (!courseSelect || !searchInput) return;
+
+    const normalizeTitle = value => value.toLocaleLowerCase('tr-TR')
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ı/g, 'i');
+    const searchTerm = normalizeTitle(searchInput.value.trim());
     
     const filteredNotes = sampleNotes.filter(note => {
         const matchesCourse = courseSelect.value === '' || note.course === courseSelect.value;
-        const matchesSearch = searchInput.value === '' || 
-            note.title.toLowerCase().includes(searchInput.value.toLowerCase());
+        const matchesSearch = [note.title, note.originalTitle || '']
+            .some(title => normalizeTitle(title).includes(searchTerm));
         
         return matchesCourse && matchesSearch;
     });
@@ -100,14 +160,34 @@ function filterNotes() {
 // Upload form handling
 function setupUploadForm() {
     const uploadForm = document.getElementById('upload-form');
+    if (!uploadForm) return;
+    const fileInput = document.getElementById('note-file');
+    const fileName = document.getElementById('note-file-name');
+
+    if (fileInput && fileName) {
+        fileInput.addEventListener('change', () => {
+            fileName.textContent = fileInput.files[0]?.name || 'Dosya seçilmedi';
+        });
+    }
     
     uploadForm.addEventListener('submit', (e) => {
         e.preventDefault();
         
-        // In a real app, this would be a file upload to a server
-        alert('Note upload simulation: File would be processed');
+        const feedback = document.getElementById('upload-feedback');
+        if (feedback) {
+            feedback.textContent = 'Demo formu denendi. Dosyan gönderilmedi veya kaydedilmedi; kütüphaneye not eklenmedi.';
+        }
         uploadForm.reset();
+        if (fileName) fileName.textContent = 'Dosya seçilmedi';
     });
+
+    uploadForm.addEventListener('input', () => {
+        const feedback = document.getElementById('upload-feedback');
+        if (feedback) feedback.textContent = '';
+    });
+
+    const demoButton = document.getElementById('try-note-upload');
+    if (demoButton) demoButton.disabled = false;
 }
 
 // Initialize notes page
