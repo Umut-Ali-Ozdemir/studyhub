@@ -5,13 +5,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Study Planner - Student Study Hub</title>
+  <script src="theme.js"></script>
   <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
   <nav class="main-nav">
-    <div class="logo">StudyHub</div>
-
+    <a class="logo" href="index.html" aria-label="StudyHub home"><span class="brand-mark" aria-hidden="true">S<span>·</span></span>StudyHub</a>
+    <button type="button" class="theme-toggle" aria-label="Dark theme" aria-pressed="false" hidden>
+      <svg class="theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13A8.5 8.5 0 0 1 11 3.5 8.5 8.5 0 1 0 20.5 13Z"/></svg>
+      <svg class="theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg>
+    </button>
     <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-navigation">
       <span aria-hidden="true"></span>
       <span aria-hidden="true"></span>
@@ -21,8 +25,8 @@
       <ul class="nav-links">
         <li><a href="index.html">Home</a></li>
         <li><a href="notes.html">Notes</a></li>
-        <li><a href="exams.html" class="active">Exam Archive</a></li>
-        <li><a href="planner.html">Study Planner</a></li>
+        <li><a href="exams.html">Exam Archive</a></li>
+        <li><a href="planner.html" aria-current="page">Study Planner</a></li>
       </ul>
 
       <div class="auth-buttons">
@@ -123,7 +127,7 @@
           style="color: var(--primary-text); margin-bottom: 1.5rem; text-align: center; font-size: 1.8rem;">✨ Yapay Zeka
           Aylık Analiz</h3>
         <div id="ai-analysis-content"
-          style="font-size: 1.1rem; line-height: 1.6; color: var(--primary-text); background: rgba(241, 239, 236, 0.5); padding: 1.5rem; border-radius: 12px; text-align: center;">
+          style="font-size: 1.1rem; line-height: 1.6; color: var(--primary-text); background: var(--surface-subtle); padding: 1.5rem; border-radius: 12px; text-align: center;">
           <!-- AI Content will be injected here -->
         </div>
       </div>

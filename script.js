@@ -6,7 +6,7 @@ function initNavbar() {
     const navigation = navbar.querySelector('.nav-right');
     if (!toggle || !navigation) return;
 
-    const mobileViewport = window.matchMedia('(max-width: 768px)');
+    const mobileViewport = window.matchMedia('(max-width: 1000px)');
 
     function setMenuOpen(isOpen) {
         navigation.classList.toggle('show', isOpen);

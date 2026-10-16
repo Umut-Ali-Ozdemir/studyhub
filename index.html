@@ -3,148 +3,118 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Student Study Hub</title>
+  <meta name="description" content="A calmer space for university study. Plan your day and explore the StudyHub notes and exam archive demos." />
+  <title>StudyHub — A little structure for your student life</title>
+  <script src="theme.js"></script>
   <link rel="stylesheet" href="styles.css" />
-  <link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
 </head>
-<header>
-  <nav class="main-nav">
-    <div class="logo">StudyHub</div>
-    
-    <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-navigation">
-      <span aria-hidden="true"></span>
-      <span aria-hidden="true"></span>
-      <span aria-hidden="true"></span>
+<body class="home-page">
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs>
+      <symbol id="icon-book" viewBox="0 0 24 24"><path d="M12 6c-3-2-6-2-9-1v14c3-1 6-1 9 1 3-2 6-2 9-1V5c-3-1-6-1-9 1Zm0 0v14"/></symbol>
+      <symbol id="icon-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4m10-4v4M3 11h18m-13 5h2m4 0h2"/></symbol>
+      <symbol id="icon-paper" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9Zm0 0v6h6M8 13h8m-8 4h5"/></symbol>
+      <symbol id="icon-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+      <symbol id="icon-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+      <symbol id="icon-device" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></symbol>
+    </defs>
+  </svg>
+  <header>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a class="logo" href="index.html" aria-label="StudyHub home"><span class="brand-mark" aria-hidden="true">S<span>·</span></span>StudyHub</a>
+    <button type="button" class="theme-toggle" aria-label="Dark theme" aria-pressed="false" hidden>
+      <svg class="theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13A8.5 8.5 0 0 1 11 3.5 8.5 8.5 0 1 0 20.5 13Z"/></svg>
+      <svg class="theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg>
     </button>
-    <div class="nav-right" id="primary-navigation">
-      <ul class="nav-links">
-        <li><a href="notes.html">Notes</a></li>
-        <li><a href="exams.html">Exam Archive</a></li>
-        <li><a href="planner.html">Study Planner</a></li>
-      </ul>
-      <div class="auth-buttons">
-        <a href="login.html" class="btn-login">Giriş Yap</a>
-        <a href="signup.html" class="btn-signup">Kayıt Ol</a>
+      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-navigation">
+        <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+      </button>
+      <div class="nav-right" id="primary-navigation">
+        <ul class="nav-links">
+          <li><a href="notes.html">Notes</a></li>
+          <li><a href="exams.html">Exam Archive</a></li>
+          <li><a href="planner.html">Study Planner</a></li>
+        </ul>
+        <div class="auth-buttons">
+          <a href="login.html" class="btn-login">Giriş Yap</a>
+          <a href="signup.html" class="btn-signup">Kayıt Ol</a>
+        </div>
       </div>
-    </div>
-  </nav>
-</header>
-    
+    </nav>
+  </header>
 
-
-<main>
-  <section class="hero">
-    <div class="hero-content">
-      <h1>Streamline Your Academic Journey</h1>
-      <p class="subtext">StudyHub helps university students stay organized by offering a central hub for notes, exam archives, and study planning tools – all in one modern and simple interface.</p>
-      <a href="notes.html" class="cta-button">Get Started</a>
-    </div>
-  </section>
-
-    
-  <section class="features container">
-    <div class="feature">
-      <div class="feature-header">
-        <div class="feature-icon">📝</div>
-         <h2>Organize Notes</h2>
+  <main id="main-content">
+    <section class="home-hero page-shell" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="eyebrow-line"></span>YOUR STUDENT WORKSPACE</p>
+        <h1 id="hero-title">A little structure.<br /><span>A clearer mind.</span></h1>
+        <p class="hero-description">From your next study session to your next exam, make space for what matters. Bring a little more intention to your university day.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="planner.html">Open study planner <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-arrow"/></svg></a>
+          <a class="button button-secondary" href="notes.html">Explore notes</a>
+        </div>
+        <p class="hero-footnote"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-device"/></svg>Planner saves to this browser. No account needed.</p>
       </div>
-      <p>Collect and manage your study materials in one place</p>
-    </div>
-    <div class="feature">
-      <div class="feature-header">
-        <div class="feature-icon">📚</div>
-        <h2>Exam Prep</h2>
+      <figure class="study-preview">
+        <figcaption class="preview-caption"><span class="preview-dot"></span> A LOOK INSIDE THE PLANNER <span class="preview-tag">Example</span></figcaption>
+        <div class="preview-body">
+          <div class="preview-heading"><div><p class="overline">ONE DAY AT A TIME</p><h2>A plan you can follow.</h2></div><span class="preview-calendar"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-calendar"/></svg></span></div>
+          <div class="preview-week" aria-label="Illustrative study week"><span>Mon</span><span>Tue</span><span class="selected">Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+          <div class="preview-tasks">
+            <div class="preview-task is-complete"><span class="preview-checkbox"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-check"/></svg></span><div><strong>Review lecture notes</strong><span>Start with the key ideas</span></div><span class="task-category">Review</span></div>
+            <div class="preview-task"><span class="preview-checkbox"></span><div><strong>Practice a problem set</strong><span>Make time for focused work</span></div><span class="task-category">Practice</span></div>
+            <div class="preview-task"><span class="preview-checkbox"></span><div><strong>Prepare for the next class</strong><span>Leave tomorrow a little clearer</span></div><span class="task-category">Prepare</span></div>
+          </div>
+          <div class="preview-note"><span class="note-marker"></span><p>Small steps count.<br /><strong>Give each day a realistic plan.</strong></p></div>
+        </div>
+        <p class="preview-disclaimer">Illustrative preview · these tasks are not saved.</p>
+      </figure>
+    </section>
+
+    <section class="home-tools page-shell" aria-labelledby="tools-title">
+      <div class="section-heading"><div><p class="eyebrow">LESS SCATTERED. MORE FOCUSED.</p><h2 id="tools-title">Your study essentials, together.</h2></div><p>One place to plan your work and explore study resources.</p></div>
+      <div class="tool-grid">
+        <article class="tool-card tool-card-featured">
+          <div class="tool-top"><span class="tool-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-calendar"/></svg></span><span class="status-label">Available locally</span></div>
+          <h3>Give your week a plan.</h3><p>Add daily tasks, keep notes and see your progress. Keep upcoming exams and deadlines in view.</p>
+          <a class="text-link" href="planner.html">Start planning <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-arrow"/></svg></a>
+        </article>
+        <article class="tool-card">
+          <div class="tool-top"><span class="tool-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-book"/></svg></span><span class="status-label status-muted">Demo content</span></div>
+          <h3>Find a fresh perspective.</h3><p>Explore example lecture notes by course or keyword. Real file sharing is still in development.</p>
+          <a class="text-link" href="notes.html">Browse notes <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-arrow"/></svg></a>
+        </article>
+        <article class="tool-card">
+          <div class="tool-top"><span class="tool-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-paper"/></svg></span><span class="status-label status-muted">Demo content</span></div>
+          <h3>Get familiar with exam prep.</h3><p>Try the sample archive filters by course and exam type. Downloadable papers are not available yet.</p>
+          <a class="text-link" href="exams.html">Explore exam archive <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-arrow"/></svg></a>
+        </article>
       </div>
-      <p>Access past exams and track your study progress</p>
+    </section>
+
+    <section class="home-approach page-shell" aria-labelledby="approach-title">
+      <div class="approach-intro"><p class="eyebrow">BUILD A STEADIER ROUTINE</p><h2 id="approach-title">A good study day<br />starts small.</h2><p>You do not need to plan the whole semester at once. Start with what is in front of you.</p><a class="text-link" href="planner.html">Make your first plan <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-arrow"/></svg></a></div>
+      <ol class="approach-steps">
+        <li><span class="step-number">01</span><div><h3>Pick a day.</h3><p>Open the calendar and choose when you want to study.</p></div></li>
+        <li><span class="step-number">02</span><div><h3>Make it manageable.</h3><p>Add a few specific tasks and a note about your goal.</p></div></li>
+        <li><span class="step-number">03</span><div><h3>Notice your progress.</h3><p>Check off finished tasks and decide what comes next.</p></div></li>
+      </ol>
+    </section>
+
+    <aside class="project-status page-shell" aria-labelledby="status-title">
+      <span class="status-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-device"/></svg></span><div><h2 id="status-title">A workspace in progress. A clear starting point.</h2><p>The planner works locally in your browser. Notes and exams use sample data; uploads are simulations. Accounts and cloud sync are not available yet. Keep a separate copy of important plans.</p></div><a class="text-link" href="planner.html">Try the planner <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#icon-arrow"/></svg></a>
+    </aside>
+  </main>
+
+  <footer class="home-footer">
+    <div class="home-footer-grid page-shell">
+      <div class="footer-brand"><a class="logo" href="index.html"><span class="brand-mark" aria-hidden="true">S<span>·</span></span>StudyHub</a><p>A little structure for your student life.<br />Built one thoughtful step at a time.</p></div>
+      <div><h2>Workspace</h2><ul><li><a href="notes.html">Notes</a></li><li><a href="exams.html">Exam Archive</a></li><li><a href="planner.html">Study Planner</a></li></ul></div>
+      <div><h2>About the project</h2><ul><li><a href="about.html">About Us</a></li><li><a href="contact.html">Contact</a></li><li><a href="privacy.html">Privacy Policy</a></li></ul><p class="footer-small">These information pages are being prepared.</p></div>
     </div>
-    <div class="feature">
-      <div class="feature-header">
-        <div class="feature-icon">📅</div>
-        <h2>Smart Scheduling</h2>
-      </div>
-      <p>Create personalized study plans and schedules</p>
-    </div>
-  </section>
-
-  
-  <section class="testimonials container">
-    <h2>What Students Say</h2>
-    <div class="testimonial-list">
-      <div class="testimonial">
-        <p>“StudyHub helped me stay organized and ace my exams!”</p>
-        <span>- Ayşe K.</span>
-      </div>
-      <div class="testimonial">
-        <p>“Easy to use and great resources. Highly recommended.”</p>
-        <span>- Mehmet T.</span>
-      </div>
-      <div class="testimonial">
-        <p>“The study planner is a lifesaver for managing my busy schedule.”</p>
-        <span>- Elif Y.</span>
-      </div>
-    </div>
-  </section>
-
-  <section class="news container">
-    <h2>Latest News & Updates</h2>
-    <ul class="news-list">
-      <li>New notes upload feature launched 🎉</li>
-      <li>Exam archive expanded with recent papers</li>
-      <li>Study planner coming soon with calendar integration</li>
-    </ul>
-  </section>
-</main>
-
-<footer>
-  <div class="main-footer">
-    <div class="footer-left">
-      <h3>Quick Links</h3>
-      <ul class="quick-links">
-        <li><a href="about.html">About Us</a></li>
-        <li><a href="notes.html">Notes</a></li>
-        <li><a href="exams.html">Exam Archive</a></li>
-        <li><a href="planner.html">Study Planner</a></li>
-        <li><a href="contact.html">Contact</a></li>
-        <li><a href="privacy.html">Privacy Policy</a></li>
-      </ul>
-      
-    </div>
-
-    <div class="footer-middle">
-      <h3>StudyHub</h3>
-      <p>
-        Streamline your academic journey with us. We provide tools and resources to make your studies easier and more effective.
-      </p>
-      <div class="social-media" aria-label="Social Media Links">
-        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
-      </div>
-
-      
-    </div>
-
-    <div class="footer-right">
-      <h3>Contact & Support</h3>
-      <form class="footer-form" onsubmit="return false;">
-        <input type="text" placeholder="Your Name" required maxlength="50" />
-        <input type="email" placeholder="Your Email" required maxlength="50" />
-        <textarea rows="3" placeholder="Your Message" maxlength="300"></textarea>
-        <button type="submit">Send</button>
-      </form>
-    </div>
-  </div>
-
-<div class="footer-bottom">
-    © 2025 StudyHub. All rights reserved by Umut Ali Özdemir.
-</div>
-</footer>
-
-
-
-
-<script src="script.js"></script>
+    <div class="home-footer-bottom page-shell"><span>© 2026 StudyHub · Umut Ali Özdemir</span><span>Plan with intention. Learn at your pace.</span></div>
+  </footer>
+  <script src="script.js"></script>
 </body>
 </html>
