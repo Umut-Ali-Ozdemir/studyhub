@@ -51,6 +51,21 @@
       <button id="planner-retry-save" type="button" class="button button-secondary" hidden>Retry save</button>
     </div>
     <p id="planner-save-status" class="planner-save-status" role="status" aria-live="polite"></p>
+    <section id="review-import" class="planner-card review-import" aria-labelledby="review-import-title" hidden>
+      <h2 id="review-import-title">Plan your suggested reviews</h2>
+      <p class="planner-help">Based only on incorrect or unanswered questions in a short Practice Hub demo test. Select reviews and confirm a date before anything is saved.</p>
+      <form id="review-import-form">
+        <div id="review-import-list" class="review-choices" role="group" aria-labelledby="review-import-title"></div>
+        <div class="review-import-actions">
+          <label for="review-import-date">Study date<input type="date" id="review-import-date" min="0001-01-01" max="9999-12-31" required /></label>
+          <button type="submit" id="review-import-add" class="button button-primary" disabled>Add selected tasks</button>
+          <button type="button" id="review-import-cancel" class="button button-secondary">Dismiss</button>
+        </div>
+        <p id="review-import-status" class="planner-help"></p>
+        <p class="planner-help">Unselected suggestions are discarded after saving. Your existing tasks and notes stay unchanged.</p>
+      </form>
+      <p id="review-import-feedback" class="review-import-feedback" role="alert"></p>
+    </section>
     <section class="planner-stats" aria-label="Tasks in the displayed month">
       <article class="planner-stat"><span>Total tasks</span><strong id="month-total">&mdash;</strong><p>In the displayed month</p></article>
       <article class="planner-stat"><span>Completed</span><strong id="month-completed">&mdash;</strong><p>One step closer to your goals</p></article>
@@ -142,6 +157,8 @@
       <span>Plan with intention. Learn at your pace.</span>
     </div>
   </footer>
+  <script src="practice-questions.js"></script>
+  <script src="practice-transfer.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

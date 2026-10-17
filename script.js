@@ -285,6 +285,15 @@ function initStudyPlanner() {
     const exportButton = document.getElementById('planner-export-raw');
     const retryButtons = [document.getElementById('planner-retry-save'), document.getElementById('planner-day-retry-save')];
     const saveStatus = document.getElementById('planner-save-status');
+    const reviewImport = typeof initPlannerReviewImport === 'function' ? initPlannerReviewImport({
+        getData: () => plannerData || {},
+        canEdit: () => !!plannerData && !editingBlocked,
+        save: savePlannerData,
+        createId: createTaskId,
+        editDay,
+        onAdded: date => selectDate(date),
+        initialDate: activeDateStr
+    }) : null;
 
     function lockEditing(blocked) {
         editingBlocked = blocked;
@@ -295,6 +304,7 @@ function initStudyPlanner() {
                 control.readOnly = blocked;
             } else control.disabled = blocked;
         });
+        reviewImport?.refresh();
     }
 
     function showStorageError(message, retry = null) {

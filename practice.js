@@ -52,6 +52,8 @@ function initPracticeHub() {
     let answers = [];
     let currentIndex = 0;
     let selection = null;
+    let attemptId = null;
+    let reviews = [];
 
     function element(tag, className, text) {
         const node = document.createElement(tag);
@@ -143,6 +145,8 @@ function initPracticeHub() {
     }
 
     function startSession() {
+        attemptId = studyHubReviews.attemptId();
+        reviews = [];
         answers = selectedQuestions.map(() => null);
         currentIndex = 0;
         const settings = document.getElementById('session-settings');
@@ -214,6 +218,28 @@ function initPracticeHub() {
         document.getElementById('score-blank').textContent = result.blank;
         document.getElementById('score-percentage').textContent = `${result.percentage}%`;
         document.getElementById('results-context').textContent = `${result.subjectName} · ${result.topicName} · ${result.difficulty} · ${result.total} questions`;
+        reviews = studyHubReviews.suggest(selectedQuestions, answers, attemptId);
+        const reviewChoices = document.getElementById('suggested-review-list');
+        reviewChoices.replaceChildren();
+        document.getElementById('review-plan-feedback').textContent = '';
+        document.getElementById('suggested-review-empty').hidden = reviews.length > 0;
+        const planButton = document.getElementById('plan-reviews');
+        planButton.disabled = true;
+        reviews.forEach(review => {
+            const details = studyHubReviews.describe(review);
+            const row = element('label', 'review-choice');
+            const checkbox = element('input');
+            checkbox.type = 'checkbox';
+            checkbox.value = review.id;
+            const text = element('span');
+            text.appendChild(element('strong', '', details.title));
+            text.appendChild(element('span', '', details.reason));
+            text.appendChild(element('small', '', details.subject));
+            row.appendChild(checkbox); row.appendChild(text); reviewChoices.appendChild(row);
+            checkbox.addEventListener('change', () => {
+                planButton.disabled = !Array.from(reviewChoices.children).some(item => item.children[0].checked);
+            });
+        });
         const review = document.getElementById('practice-review');
         review.replaceChildren();
         selectedQuestions.forEach((question, index) => {
@@ -245,6 +271,21 @@ function initPracticeHub() {
         });
         showView('results');
         document.getElementById('results-title').focus();
+    });
+
+    document.getElementById('plan-reviews').addEventListener('click', () => {
+        const chosen = Array.from(document.getElementById('suggested-review-list').children)
+            .filter(row => row.children[0].checked).map(row => row.children[0].value);
+        const selected = reviews.filter(review => chosen.includes(review.id));
+        const feedback = document.getElementById('review-plan-feedback');
+        if (!selected.length) { feedback.textContent = 'Select at least one review to plan.'; return; }
+        try {
+            const transfer = studyHubReviews.validate({ version: 1, attemptId, reviews: selected });
+            sessionStorage.setItem(studyHubReviews.key, JSON.stringify(transfer));
+            window.location.assign('planner.html?reviews=1');
+        } catch {
+            feedback.textContent = 'Review suggestions could not be transferred. Allow session storage and try again. Your results and selections are still here; no planner tasks were changed.';
+        }
     });
 
     document.getElementById('restart-practice').addEventListener('click', startSession);

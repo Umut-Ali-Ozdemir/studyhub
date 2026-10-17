@@ -1,4 +1,4 @@
-// Optional real-browser layout check using an installed Chromium browser.
+// Optional real-browser layout and Practice -> Planner checks using installed Chromium.
 // Run: node tests/planner-layout.browser.cjs "C:\path\to\chrome.exe"
 // Uses a temporary browser profile and local fixtures, never your saved plans.
 const fs = require('node:fs');
@@ -112,11 +112,125 @@ async function checkLayout() {
     document.body.appendChild(output);
 }
 
+async function checkIntegration() {
+    const output = document.getElementById('layout-results');
+    const results = JSON.parse(atob(output.textContent));
+    const key = 'studyHubPracticeReviews';
+    const plannerKey = 'studyHubPlannerData';
+    const existing = JSON.stringify({ '2026-10-17': { generalNote: 'Keep this day note', tasks: [
+        { id: 123, text: 'Existing task', note: 'Keep this task note', completed: false, isDeadline: true }
+    ] } });
+    function check(condition, message) { if (!condition) throw new Error(message); }
+    for (const width of [1200, 390]) {
+        for (const mode of ['save', 'retry', 'dismiss', 'blocked-handoff']) {
+            const frame = document.createElement('iframe');
+            frame.style.cssText = `width:${width}px;height:1200px;border:0;display:block`;
+            function load(url) {
+                return new Promise(resolve => { frame.onload = resolve; frame.src = url; });
+            }
+            try {
+                const loaded = load('/exams.html'); document.body.appendChild(frame); await loaded;
+                let win = frame.contentWindow, doc = frame.contentDocument;
+                win.localStorage.setItem(plannerKey, existing);
+                win.localStorage.setItem('studyHubTheme', width === 390 ? 'dark' : 'light');
+                doc.documentElement.setAttribute('data-theme', width === 390 ? 'dark' : 'light');
+                win.sessionStorage.removeItem(key);
+                doc.getElementById('practice-form').requestSubmit();
+                const bank = win.eval('practiceQuestionBank');
+                const topics = new Set();
+                for (let i = 0; i < 4; i++) {
+                    const question = bank.questions.find(q => q.text === doc.getElementById('question-title').textContent);
+                    check(!!question, 'Quiz did not start');
+                    const isNew = !topics.has(question.topic);
+                    const answer = isNew ? topics.size === 0 ? (question.correctIndex + 1) % 4 : null : question.correctIndex;
+                    topics.add(question.topic);
+                    if (answer !== null) doc.querySelectorAll('#answer-options input')[answer].click();
+                    if (i < 3) doc.getElementById('next-question').click();
+                }
+                doc.getElementById('finish-practice').click();
+                check(doc.getElementById('score-incorrect').textContent === '1', 'Incorrect count changed');
+                check(doc.getElementById('score-blank').textContent === '1', 'Blank count changed');
+                check(doc.querySelectorAll('#suggested-review-list input').length === 2, 'All Topics reviews were not split');
+                check(win.localStorage.getItem(plannerKey) === existing, 'Practice changed Planner data');
+                check(win.sessionStorage.getItem(key) === null, 'Handoff happened without consent');
+                for (const checkbox of doc.querySelectorAll('#suggested-review-list input')) checkbox.click();
+                if (mode === 'blocked-handoff') {
+                    const original = win.Storage.prototype.setItem;
+                    win.Storage.prototype.setItem = function (storageKey, value) {
+                        if (storageKey === key) throw new Error('Blocked session storage');
+                        return original.call(this, storageKey, value);
+                    };
+                    doc.getElementById('plan-reviews').click();
+                    check(doc.getElementById('review-plan-feedback').textContent.includes('could not be transferred'), 'Missing handoff error');
+                    check(!doc.getElementById('practice-results').hidden, 'Results lost after handoff error');
+                    win.Storage.prototype.setItem = original;
+                }
+                const navigated = new Promise(resolve => { frame.onload = resolve; });
+                doc.getElementById('plan-reviews').click();
+                const raw = win.sessionStorage.getItem(key);
+                check(!!raw, 'Missing handoff');
+                await navigated;
+                win = frame.contentWindow; doc = frame.contentDocument;
+                check(win.location.pathname === '/planner.html', 'Did not navigate in the same frame');
+                check(!doc.getElementById('review-import').hidden, 'Planner preview missing');
+                check(win.localStorage.getItem(plannerKey) === existing, 'Preview changed Planner data');
+                check(doc.documentElement.scrollWidth <= width + 1, 'Review preview causes horizontal overflow');
+                if (mode === 'dismiss') {
+                    doc.getElementById('review-import-cancel').click();
+                    check(win.sessionStorage.getItem(key) === null, 'Dismiss did not clear handoff');
+                    check(win.localStorage.getItem(plannerKey) === existing, 'Dismiss changed Planner data');
+                } else {
+                    doc.querySelectorAll('#review-import-list input')[1].click();
+                    doc.getElementById('review-import-date').value = '2026-11-05';
+                    let original;
+                    if (mode === 'retry') {
+                        original = win.Storage.prototype.setItem;
+                        win.Storage.prototype.setItem = function (storageKey, value) {
+                            if (storageKey === plannerKey) throw new Error('Quota failure');
+                            return original.call(this, storageKey, value);
+                        };
+                    }
+                    doc.getElementById('review-import-form').requestSubmit();
+                    if (mode === 'retry') {
+                        check(win.localStorage.getItem(plannerKey) === existing, 'Failed save changed data');
+                        check(win.sessionStorage.getItem(key) === raw, 'Failed save discarded reviews');
+                        check(!doc.getElementById('planner-retry-save').hidden, 'Retry control missing');
+                        win.Storage.prototype.setItem = original;
+                        doc.getElementById('planner-retry-save').click();
+                    }
+                    const saved = win.localStorage.getItem(plannerKey);
+                    const data = JSON.parse(saved);
+                    check(JSON.stringify(data['2026-10-17']) === JSON.stringify(JSON.parse(existing)['2026-10-17']), 'Existing day was changed');
+                    check(data['2026-11-05'].tasks.length === 1, 'Unselected review was added');
+                    check(data['2026-11-05'].tasks[0].source.type === 'practice-review', 'Review source missing');
+                    check(win.sessionStorage.getItem(key) === null, 'Successful save did not clear handoff');
+                    win.sessionStorage.setItem(key, raw);
+                    await load('/planner.html?reviews=1');
+                    win = frame.contentWindow; doc = frame.contentDocument;
+                    const choices = doc.querySelectorAll('#review-import-list input');
+                    check(choices[0].disabled && !choices[0].checked, 'Repeated review was not blocked');
+                    choices[1].click();
+                    check(doc.getElementById('review-import-add').disabled, 'Duplicate review remains actionable');
+                    check(win.localStorage.getItem(plannerKey) === saved, 'Replay changed saved data');
+                    win.sessionStorage.setItem(key, '{');
+                    await load('/planner.html?reviews=invalid');
+                    doc = frame.contentDocument;
+                    check(doc.getElementById('review-import-feedback').textContent.includes('could not be read or validated'), 'Invalid transfer error missing');
+                    check(frame.contentWindow.localStorage.getItem(plannerKey) === saved, 'Invalid transfer changed saved data');
+                }
+                results.push({ width, mode: 'integration-' + mode, passed: true });
+            } catch (error) { results.push({ width, mode: 'integration-' + mode, passed: false, error: error.message }); }
+            finally { frame.remove(); }
+        }
+    }
+    output.textContent = btoa(JSON.stringify(results));
+}
+
 const server = http.createServer((request, response) => {
     const url = new URL(request.url, 'http://localhost');
     if (url.pathname === '/layout-check') {
         response.setHeader('Content-Type', 'text/html; charset=utf-8');
-        response.end(`<html><body><script>(${checkLayout.toString()})()</script></body></html>`);
+        response.end(`<html><body><script>(${checkLayout.toString()})().then(${checkIntegration.toString()})</script></body></html>`);
         return;
     }
     const file = path.resolve(root, '.' + url.pathname);

@@ -31,7 +31,9 @@ class Element {
     }
 }
 
-function boot() {
+function boot(faults = {}) {
+    let handoff = null;
+    let navigation = null;
     const nodes = {};
     for (const match of read('exams.html').matchAll(/<([a-z][\w-]*)\b[^>]*\bid="([^"]+)"[^>]*>/g)) {
         nodes[match[2]] = new Element(match[1]);
@@ -50,9 +52,14 @@ function boot() {
             setItem() { throw new Error('Practice must not write browser storage'); },
             removeItem() { throw new Error('Practice must not remove browser storage'); }
         },
+        sessionStorage: {
+            setItem(key, value) { assert.equal(key, 'studyHubPracticeReviews'); if (faults.write) throw new Error('Blocked'); handoff = value; }
+        },
+        window: { location: { assign(url) { navigation = url; } } },
         fetch() { throw new Error('Practice must not make network requests'); }
     });
     vm.runInContext(read('practice-questions.js'), context);
+    vm.runInContext(read('practice-transfer.js'), context);
     vm.runInContext(read('practice.js'), context);
     vm.runInContext('initPracticeHub()', context);
     const bank = vm.runInContext('practiceQuestionBank', context);
@@ -64,7 +71,7 @@ function boot() {
         radios.forEach((radio, position) => { radio.checked = position === index; });
         nodes['answer-options'].fire('change', { target: radios[index] });
     }
-    return { nodes, context, bank, choose, currentQuestion };
+    return { nodes, context, bank, choose, currentQuestion, handoff: () => handoff, navigation: () => navigation };
 }
 
 test('bank has 36 unique questions and a complete, bounded pool', () => {
@@ -88,6 +95,72 @@ test('bank has 36 unique questions and a complete, bounded pool', () => {
         assert.ok(question.explanation.length > 30);
         assert.ok(bank.subjects.find(subject => subject.id === question.subject).topics.some(topic => topic.id === question.topic));
     }
+});
+
+test('reviews group wrong and blank answers by topic, remain stable, and omit correct topics', () => {
+    const { context } = boot();
+    const result = vm.runInContext(`(() => {
+        const questions = getPracticeQuestions({subject: 'math', topic: 'all', difficulty: 'medium'});
+        const answers = questions.map((q, i) => i === 0 ? (q.correctIndex + 1) % 4 : i === 2 ? null : q.correctIndex);
+        const id = studyHubReviews.attemptId();
+        return { first: studyHubReviews.suggest(questions, answers, id),
+            second: studyHubReviews.suggest(questions, answers, id),
+            correct: studyHubReviews.suggest(questions, questions.map(q => q.correctIndex), id),
+            topicOnly: studyHubReviews.suggest(questions.slice(0, 2), [null, undefined], id) };
+    })()`, context);
+    assert.equal(result.first.length, 2);
+    assert.equal(result.first[0].topic, 'algebra'); assert.equal(result.first[0].incorrect, 1);
+    assert.equal(result.first[1].topic, 'derivatives'); assert.equal(result.first[1].blank, 1);
+    assert.deepEqual(result.first, result.second);
+    assert.equal(result.correct.length, 0);
+    assert.equal(result.topicOnly.length, 1); assert.equal(result.topicOnly[0].blank, 2);
+    assert.equal(vm.runInContext('new Set(Array.from({length: 100}, () => studyHubReviews.attemptId())).size', context), 100);
+});
+
+test('only selected reviews are transferred on explicit action, and restarting gives a new attempt ID', () => {
+    const app = boot(); const { nodes } = app;
+    nodes['practice-form'].fire('submit'); nodes['finish-practice'].fire('click');
+    assert.equal(nodes['suggested-review-list'].children.length, 2);
+    assert.equal(nodes['plan-reviews'].disabled, true); assert.equal(app.handoff(), null);
+    nodes['plan-reviews'].fire('click'); assert.equal(app.handoff(), null);
+    const check = nodes['suggested-review-list'].children[0].children[0];
+    check.checked = true; check.fire('change');
+    assert.equal(nodes['plan-reviews'].disabled, false);
+    nodes['plan-reviews'].fire('click');
+    const first = JSON.parse(app.handoff());
+    assert.equal(first.version, 1); assert.equal(first.reviews.length, 1);
+    assert.equal(first.reviews[0].id, check.value);
+    assert.equal(app.navigation(), 'planner.html?reviews=1');
+    nodes['plan-reviews'].fire('click'); assert.equal(JSON.parse(app.handoff()).attemptId, first.attemptId);
+    nodes['restart-practice'].fire('click'); nodes['finish-practice'].fire('click');
+    const secondCheck = nodes['suggested-review-list'].children[0].children[0];
+    secondCheck.checked = true; secondCheck.fire('change'); nodes['plan-reviews'].fire('click');
+    assert.notEqual(JSON.parse(app.handoff()).attemptId, first.attemptId);
+});
+
+test('blocked session storage retains results and review selections without navigating', () => {
+    const app = boot({ write: true }); const { nodes } = app;
+    nodes['practice-form'].fire('submit'); nodes['finish-practice'].fire('click');
+    const checkbox = nodes['suggested-review-list'].children[0].children[0];
+    checkbox.checked = true; checkbox.fire('change'); nodes['plan-reviews'].fire('click');
+    assert.equal(app.handoff(), null); assert.equal(app.navigation(), null);
+    assert.equal(checkbox.checked, true); assert.equal(nodes['practice-results'].hidden, false);
+    assert.match(nodes['review-plan-feedback'].textContent, /could not be transferred/);
+});
+
+test('a fully correct test shows no suggested reviews or actionable planning control', () => {
+    const app = boot(); const { nodes } = app;
+    nodes['practice-form'].fire('submit');
+    for (let i = 0; i < 4; i++) {
+        app.choose(app.currentQuestion().correctIndex);
+        if (i < 3) nodes['next-question'].fire('click');
+    }
+    nodes['finish-practice'].fire('click');
+    assert.equal(nodes['score-correct'].textContent, '4');
+    assert.equal(nodes['suggested-review-list'].children.length, 0);
+    assert.equal(nodes['suggested-review-empty'].hidden, false);
+    assert.equal(nodes['plan-reviews'].disabled, true);
+    assert.equal(app.handoff(), null);
 });
 
 test('answer keys agree with independently checked calculations and definitions', () => {

@@ -12,6 +12,10 @@ const fixtureTask = (overrides = {}) => ({
 });
 const record = (tasks = [fixtureTask()], generalNote = 'Keep this day note') =>
     JSON.stringify({ [date]: { generalNote, tasks } });
+const reviewTransfer = () => JSON.stringify({ version: 1, attemptId: 'attempt-demo-1', reviews: [
+    { id: 'attempt-demo-1:math:algebra', subject: 'math', topic: 'algebra', incorrect: 1, blank: 0 },
+    { id: 'attempt-demo-1:math:derivatives', subject: 'math', topic: 'derivatives', incorrect: 0, blank: 2 }
+] });
 
 // This DOM substitute tests data and event behavior, not browser layout/download UI.
 class Element {
@@ -75,7 +79,7 @@ class Element {
     }
 }
 
-function boot(initial = null, faults = {}, today = '2026-10-17') {
+function boot(initial = null, faults = {}, today = '2026-10-17', transfer = { raw: null }) {
     const nodes = {};
     for (const match of html.matchAll(/<([a-z][\w-]*)\b[^>]*\bid="([^"]+)"[^>]*>/g)) {
         const node = new Element(match[1]);
@@ -116,16 +120,22 @@ function boot(initial = null, faults = {}, today = '2026-10-17') {
             removeItem() { throw new Error('Saved data must never be deleted'); },
             clear() { throw new Error('Storage must never be cleared'); }
         },
+        sessionStorage: {
+            getItem(key) { assert.equal(key, 'studyHubPracticeReviews'); if (transfer.read) throw new Error('Blocked'); return transfer.raw; },
+            removeItem(key) { assert.equal(key, 'studyHubPracticeReviews'); if (transfer.remove) throw new Error('Blocked'); transfer.raw = null; }
+        },
         Blob: class { constructor(parts) { blobs.push(parts.join('')); } },
         URL: { createObjectURL: () => 'blob:test', revokeObjectURL() {} },
         setTimeout: callback => callback()
     });
+    vm.runInContext(fs.readFileSync(path.join(root, 'practice-questions.js'), 'utf8'), context);
+    vm.runInContext(fs.readFileSync(path.join(root, 'practice-transfer.js'), 'utf8'), context);
     vm.runInContext(script, context);
     vm.runInContext('initStudyPlanner()', context);
     const days = () => nodes['calendar-grid'].children.filter(node => !node.className.split(' ').includes('empty'));
     const open = (day = 17) => days()[day - 1].click();
     const add = text => { nodes['new-task-input'].value = text; nodes['add-task-form'].fire('submit'); };
-    return { nodes, context, writes, blobs, faults, days, open, add, stored: () => stored, externalWrite: value => { stored = value; } };
+    return { nodes, context, writes, blobs, faults, days, open, add, transfer, stored: () => stored, externalWrite: value => { stored = value; } };
 }
 
 test('opens valid legacy data without rewriting it; numeric IDs still complete and delete', () => {
@@ -534,4 +544,126 @@ test('0, 1, 3, 5 and 15 daily tasks preserve calendar structure in four-, five- 
             assert.equal(app.stored(), raw); assert.equal(app.writes.length, 0);
         }
     }
+});
+
+test('review preview never writes; only confirmed choices are added to the selected date', () => {
+    const raw = record(); const transfer = { raw: reviewTransfer() };
+    const app = boot(raw, {}, date, transfer);
+    assert.equal(app.nodes['review-import'].hidden, false);
+    assert.equal(app.stored(), raw); assert.equal(app.writes.length, 0);
+    app.nodes['review-import-list'].children[1].querySelector('input').checked = false;
+    app.nodes['review-import-date'].value = '2026-11-05';
+    app.nodes['review-import-form'].fire('submit');
+    const data = JSON.parse(app.stored());
+    assert.deepEqual(data[date], JSON.parse(raw)[date]);
+    const tasks = data['2026-11-05'].tasks;
+    assert.equal(tasks.length, 1); assert.equal(tasks[0].text, 'Review Algebra');
+    assert.equal(tasks[0].isDeadline, false);
+    assert.equal(tasks[0].source.id, 'attempt-demo-1:math:algebra');
+    assert.match(tasks[0].note, /1 incorrect, 0 unanswered/);
+    assert.match(tasks[0].note, /short StudyHub demo test/);
+    assert.equal(app.nodes['selected-date-title'].textContent, 'November 5, 2026');
+    assert.equal(transfer.raw, null); assert.equal(app.writes.length, 1);
+    assert.equal(app.nodes['review-import'].hidden, true);
+});
+
+test('dismiss and invalid dates never write Planner data', () => {
+    const transfer = { raw: reviewTransfer() }; const raw = record();
+    const app = boot(raw, {}, date, transfer);
+    for (const invalid of ['', '2026-02-30', 'not-a-date', '10000-01-01']) {
+        app.nodes['review-import-date'].value = invalid;
+        app.nodes['review-import-form'].fire('submit');
+        assert.equal(app.stored(), raw); assert.notEqual(transfer.raw, null);
+        assert.match(app.nodes['review-import-feedback'].textContent, /valid date/);
+    }
+    app.nodes['review-import-cancel'].click();
+    assert.equal(transfer.raw, null); assert.equal(app.stored(), raw); assert.equal(app.writes.length, 0);
+});
+
+test('invalid transfer types, lengths, versions, IDs, topics and counts are isolated from Planner data', () => {
+    const base = JSON.parse(reviewTransfer());
+    const mutate = change => { const value = JSON.parse(reviewTransfer()); change(value); return JSON.stringify(value); };
+    const invalid = ['{', 'null', '[]', 'false', 'x'.repeat(8193),
+        mutate(v => { v.version = 2; }), mutate(v => { v.attemptId = '<script>'; }),
+        mutate(v => { v.attemptId = 'attempt-' + 'a'.repeat(101); }),
+        mutate(v => { v.reviews = []; }), mutate(v => { v.reviews = 'bad'; }),
+        mutate(v => { v.reviews[0] = null; }), mutate(v => { v.reviews[0].id = 'wrong'; }),
+        mutate(v => { v.reviews.push(v.reviews[0]); }), mutate(v => { v.reviews = Array(7).fill(v.reviews[0]); }),
+        mutate(v => { v.reviews[0].topic = '<img src=x onerror=INJECTION_MARKER>'; }),
+        mutate(v => { v.reviews[0].subject = 'a'.repeat(33); }),
+        mutate(v => { v.reviews[0].incorrect = '1'; }), mutate(v => { v.reviews[0].incorrect = -1; }),
+        mutate(v => { v.reviews[0].blank = 0.5; }), mutate(v => { v.reviews[0].incorrect = 0; }),
+        mutate(v => { v.reviews[0].blank = 37; }), mutate(v => { v.reviews[0].blank = 35; })];
+    assert.equal(base.version, 1);
+    for (const raw of invalid) {
+        const app = boot(record(), {}, date, { raw });
+        assert.equal(app.nodes['review-import'].hidden, false);
+        assert.match(app.nodes['review-import-feedback'].textContent, /could not be read or validated/);
+        assert.equal(app.nodes['review-import-add'].disabled, true);
+        app.nodes['review-import-form'].fire('submit');
+        assert.equal(app.writes.length, 0); assert.equal(app.transfer.raw, raw);
+        app.add('Manual task still works'); assert.equal(JSON.parse(app.stored())[date].tasks.length, 2);
+    }
+});
+
+test('failed import preserves tasks and suggestions; retry commits once and prevents replay on any date', () => {
+    const raw = record(); const originalTransfer = reviewTransfer();
+    const transfer = { raw: originalTransfer }; const faults = { write: true };
+    const app = boot(raw, faults, date, transfer);
+    app.nodes['review-import-form'].fire('submit');
+    assert.equal(app.stored(), raw); assert.equal(transfer.raw, originalTransfer);
+    assert.equal(app.nodes['review-import-list'].children[0].querySelector('input').checked, true);
+    assert.equal(app.nodes['review-import-cancel'].disabled, true);
+    app.nodes['review-import-cancel'].click(); assert.equal(transfer.raw, originalTransfer);
+    faults.write = false; app.nodes['planner-retry-save'].click();
+    const data = JSON.parse(app.stored());
+    assert.equal(data[date].tasks.length, 3); assert.equal(data[date].generalNote, 'Keep this day note');
+    assert.equal(app.writes.length, 1); assert.equal(transfer.raw, null);
+    app.nodes['planner-retry-save'].click(); assert.equal(app.writes.length, 1);
+    // Existing review tasks may be on another day; duplicate checks span all dates.
+    const replay = boot(JSON.stringify({ '2026-12-01': data[date] }), {}, date, { raw: originalTransfer });
+    assert.equal(replay.nodes['review-import-add'].disabled, true);
+    assert.match(replay.nodes['review-import-status'].textContent, /already in your planner/);
+    replay.nodes['review-import-form'].fire('submit'); assert.equal(replay.writes.length, 0);
+});
+
+test('failed transfer cleanup preserves the saved tasks and exposes safe dismissal without duplicates', () => {
+    const transfer = { raw: reviewTransfer(), remove: true }; const app = boot(record(), {}, date, transfer);
+    app.nodes['review-import-form'].fire('submit');
+    assert.equal(app.writes.length, 1); assert.equal(JSON.parse(app.stored())[date].tasks.length, 3);
+    assert.notEqual(transfer.raw, null); assert.equal(app.nodes['review-import-add'].disabled, true);
+    assert.match(app.nodes['review-import-feedback'].textContent, /could not be cleared/);
+    app.nodes['review-import-form'].fire('submit'); assert.equal(app.writes.length, 1);
+    transfer.remove = false; app.nodes['review-import-cancel'].click(); assert.equal(transfer.raw, null);
+});
+
+test('blocked transfer storage does not block manual planning; invalid Planner records block review import', () => {
+    const app = boot(record(), {}, date, { raw: reviewTransfer(), read: true });
+    assert.match(app.nodes['review-import-feedback'].textContent, /could not be read/);
+    app.add('Manual task'); assert.equal(app.writes.length, 1);
+    const invalid = boot('{', {}, date, { raw: reviewTransfer() });
+    assert.equal(invalid.nodes['review-import-add'].disabled, true);
+    invalid.nodes['review-import-form'].fire('submit');
+    assert.equal(invalid.stored(), '{'); assert.equal(invalid.writes.length, 0);
+});
+
+test('an external Planner change blocks import without discarding the pending transfer', () => {
+    const transfer = { raw: reviewTransfer() }; const app = boot(record(), {}, date, transfer);
+    const external = record([fixtureTask({ text: 'Changed in another tab' })]);
+    app.externalWrite(external);
+    app.nodes['review-import-form'].fire('submit');
+    assert.equal(app.stored(), external); assert.equal(app.writes.length, 0);
+    assert.equal(transfer.raw, reviewTransfer());
+    assert.match(app.nodes['planner-storage-message'].textContent, /changed elsewhere/);
+    assert.equal(app.nodes['review-import-add'].disabled, true);
+});
+
+test('successful import never clears a newer handoff written after the preview was opened', () => {
+    const transfer = { raw: reviewTransfer() }; const app = boot(record(), {}, date, transfer);
+    const newer = reviewTransfer().replaceAll('attempt-demo-1', 'attempt-newer-2');
+    transfer.raw = newer;
+    app.nodes['review-import-form'].fire('submit');
+    assert.equal(app.writes.length, 1);
+    assert.equal(transfer.raw, newer);
+    assert.match(app.nodes['review-import-feedback'].textContent, /could not be cleared/);
 });

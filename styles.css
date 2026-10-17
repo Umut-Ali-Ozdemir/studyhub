@@ -1230,6 +1230,25 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
     }
 }
 
+/* Opt-in review handoff controls, shared by Practice Hub and Planner. */
+.review-choices { display: grid; gap: var(--space-2); margin-block: var(--space-4); }
+.review-choice { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-3); background: var(--surface-subtle); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; min-width: 0; }
+.review-choice input { flex-shrink: 0; width: 18px; height: 18px; margin-top: 3px; }
+.review-choice > span { min-width: 0; overflow-wrap: anywhere; }
+.review-choice strong, .review-choice span span, .review-choice small { display: block; }
+.review-choice strong { font-size: .875rem; }
+.review-choice span span, .review-choice small { color: var(--text-muted); font-size: .8125rem; }
+.review-import { margin-bottom: var(--space-6); }
+.review-import-actions { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: end; }
+.review-import-actions label { display: grid; gap: var(--space-2); font-size: .875rem; }
+.review-import-actions input { min-height: 44px; border: 1px solid var(--input-border); border-radius: var(--radius-sm); padding: 8px 12px; max-width: 100%; }
+.review-import-feedback { color: var(--danger); font-size: .875rem; margin-top: var(--space-3); }
+.suggested-reviews { margin-block: var(--space-6); }
+.suggested-reviews .practice-muted { margin-block: var(--space-3); }
+@media (min-width: 601px) {
+    .review-choices { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
 }

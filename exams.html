@@ -66,7 +66,7 @@
         <span class="practice-guide-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 11l2 2 4-4M8 3h8v3H8z"/><path d="M8 5H5v16h14V5h-3M8 17h8"/></svg></span>
         <h2 id="guide-title">Practice with intention.</h2>
         <ol><li><strong>Make a small plan.</strong><span>Choose from a fixed pool of <span id="practice-bank-size">36</span> questions across three subjects.</span></li><li><strong>Work at your pace.</strong><span>Change answers or move between questions. There is no timer.</span></li><li><strong>Learn from the result.</strong><span>Review your answers alongside a short explanation for every question.</span></li></ol>
-        <p class="practice-session-note">Sessions stay in memory and reset when you reload this page. Nothing is added to your Study Planner.</p>
+        <p class="practice-session-note">Sessions reset when you reload this page. After finishing, you can choose suggested reviews to plan. Nothing is added without your confirmation in Study Planner.</p>
       </aside>
     </section>
 
@@ -91,6 +91,15 @@
       <div class="practice-results-header"><div><p class="practice-kicker">03 / REFLECT AND TRY AGAIN</p><h2 id="results-title" tabindex="-1">Your practice results</h2><p id="results-context" class="practice-muted"></p></div><div class="practice-result-actions"><button id="restart-practice" class="button button-secondary" type="button">Restart this test</button><button id="new-practice" class="button button-primary" type="button">Create a new test</button></div></div>
       <dl class="practice-score-grid"><div><dt>Correct</dt><dd id="score-correct">0</dd></div><div><dt>Incorrect</dt><dd id="score-incorrect">0</dd></div><div><dt>Blank</dt><dd id="score-blank">0</dd></div><div class="practice-score-highlight"><dt>Accuracy</dt><dd id="score-percentage">0%</dd></div></dl>
       <p class="practice-score-note">Accuracy = correct answers ÷ total questions, including blanks, rounded to the nearest whole percent. These are practice results, not an official assessment.</p>
+      <section class="practice-panel suggested-reviews" aria-labelledby="suggested-reviews-title">
+        <h2 id="suggested-reviews-title">Suggested Reviews</h2>
+        <p class="practice-muted">Based only on incorrect or unanswered questions in this short demo test. These rule-based suggestions are not an assessment of your overall knowledge.</p>
+        <p id="suggested-review-empty" hidden>No reviews needed for this test. Every answer was correct.</p>
+        <div id="suggested-review-list" class="review-choices" role="group" aria-labelledby="suggested-reviews-title"></div>
+        <button id="plan-reviews" type="button" class="button button-primary" disabled>Plan Reviews</button>
+        <p class="practice-muted">Continue in this tab to choose a date and confirm your tasks in Study Planner.</p>
+        <p id="review-plan-feedback" class="practice-error" role="alert"></p>
+      </section>
       <div class="practice-review-heading"><h2>Review the solutions</h2><p class="practice-muted">Your response, the correct answer and the reasoning behind it.</p></div>
       <ol id="practice-review" class="practice-review-list"></ol>
     </section>
@@ -127,6 +136,7 @@
   </footer>
   <script src="script.js"></script>
   <script src="practice-questions.js"></script>
+  <script src="practice-transfer.js"></script>
   <script src="practice.js"></script>
 </body>
 </html>

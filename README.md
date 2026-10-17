@@ -17,7 +17,15 @@ Questions are not taken from university exams. A test draws unique questions fro
 
 Answers can be changed, cleared or left blank. Results include correct, incorrect and blank counts, plus accuracy rounded to the nearest whole percent (correct answers divided by all questions, including blanks). Restarting repeats the same questions with cleared answers; creating a new test returns to the setup form.
 
-Practice sessions stay in memory and reset on page reload. They do not read or write Planner data, and no Planner integration is implemented.
+Practice sessions stay in memory and reset on page reload. Suggested Reviews group incorrect and unanswered questions by topic, including each topic separately in All topics tests. Fully correct tests produce no review tasks. These deterministic suggestions describe only the short demo test; they are not AI output or an assessment of overall knowledge.
+
+Choose suggestions and use **Plan Reviews** to continue to Planner in the same tab. Planner shows a preview with selectable reviews and a study date. Only **Add selected tasks** writes to Planner; dismissing the preview never changes existing tasks. Unselected reviews are discarded after a successful save.
+
+The handoff uses `sessionStorage` key `studyHubPracticeReviews`: version 1, an `attemptId`, and bounded review records containing stable IDs, subject/topic IDs, and incorrect/blank counts. Both pages validate the contract; display text comes from known question-bank metadata. Practice Hub never accesses `studyHubPlannerData`. Each new or restarted attempt gets a new ID; suggestions for that attempt retain their IDs.
+
+Imported tasks retain the existing Planner fields and add optional `source: { type: "practice-review", id, attemptId }` metadata. Duplicate source IDs are checked across every saved date, including completed tasks. Deleting a task also removes its duplicate marker; there is no separate attempt history. Legacy tasks and other metadata are preserved.
+
+Failed Planner writes keep both the previous saved record and the pending suggestions. Editing and dismissal pause until the pending save is retried or the page is reloaded. Successful writes clear the handoff; if session cleanup fails, source IDs prevent duplicate additions. Invalid handoffs leave the saved Planner untouched. Use a consistent origin and the same tab; no cross-device sync or Practice session history is provided.
 
 ## Run locally
 
@@ -32,11 +40,14 @@ Open `index.html` in a modern browser, or serve this directory with an existing 
 - `script.js`: shared navigation, Notes demo and existing Planner behavior.
 - `practice-questions.js`: original question bank and subject/topic metadata.
 - `practice.js`: test selection, question navigation, scoring and solution review.
+- `practice-transfer.js`: review rules, versioned handoff validation and Planner import preview. Planner also loads question-bank metadata to validate topic IDs.
 - `notesUpdate.html`: an older standalone Notes prototype, outside the main navigation flow.
 
 ## Checks
 
-With Node.js installed, run `node --test tests/planner.test.cjs tests/practice.test.cjs` to check Planner validation, safe text rendering, storage failures, legacy compatibility, calendar keyboard navigation, monthly statistics and deadline ordering, as well as Practice Hub questions, scoring and navigation. The UI tests use a small DOM substitute; they do not replace real-browser responsive, keyboard, download or screen-reader testing.
+With Node.js installed, run `node --test tests/planner.test.cjs tests/practice.test.cjs` to check Planner validation, safe text rendering, storage failures, legacy compatibility, calendar keyboard navigation, monthly statistics, deadline ordering, Practice Hub questions/scoring, topic-based suggestions, user confirmation, invalid handoffs and duplicate prevention. These unit tests use a small DOM substitute.
+
+For optional real-browser checks with an already installed Chrome/Chromium browser, run `node tests/planner-layout.browser.cjs "C:\Program Files\Google\Chrome\Application\chrome.exe"` (adjust the executable path as needed). It uses a temporary browser profile and local HTTP server, checks calendar/dashboard dimensions and exercises the same-tab Practice-to-Planner flow, including storage failure/retry and replay. It does not access your normal browser profile. Manual visual, touch, download and screen-reader testing is still useful.
 
 Planner rejects malformed saved records without replacing them and offers a raw JSON download when the saved text can be read. Failed writes leave the last saved record unchanged and pause editing until the operation is retried or the page is reloaded. Export the saved record before attempting manual recovery; partial or automatic repair is not implemented.
 
