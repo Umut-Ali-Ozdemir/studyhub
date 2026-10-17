@@ -48,7 +48,7 @@ function initNavbar() {
 const sampleNotes = [
     {
         id: 1,
-        title: "Kalkülüs: Türevler",
+        title: "Calculus: Derivatives",
         originalTitle: "Calculus Derivatives",
         course: "math",
         author: "John Doe",
@@ -56,7 +56,7 @@ const sampleNotes = [
     },
     {
         id: 2,
-        title: "Makine Öğrenmesine Giriş",
+        title: "Introduction to Machine Learning",
         originalTitle: "Machine Learning Basics",
         course: "cs",
         author: "Jane Smith",
@@ -65,10 +65,10 @@ const sampleNotes = [
 ];
 
 const noteCourseNames = {
-    math: 'Matematik',
-    cs: 'Bilgisayar Bilimleri',
-    physics: 'Fizik',
-    biology: 'Biyoloji'
+    math: 'Mathematics',
+    cs: 'Computer Science',
+    physics: 'Physics',
+    biology: 'Biology'
 };
 
 // Notes rendering function
@@ -80,8 +80,8 @@ function renderNotes(notes) {
     const resultsCount = document.getElementById('notes-results-count');
     if (resultsCount) {
         resultsCount.textContent = notes.length === 0
-            ? 'Eşleşen not yok'
-            : `${notes.length} örnek not gösteriliyor`;
+            ? 'No matching notes'
+            : `${notes.length} sample ${notes.length === 1 ? 'note' : 'notes'} shown`;
     }
 
     function createElement(tag, className, text) {
@@ -93,9 +93,9 @@ function renderNotes(notes) {
 
     if (notes.length === 0) {
         const emptyState = createElement('div', 'notes-empty');
-        emptyState.appendChild(createElement('span', 'notes-empty-label', 'SONUÇ BULUNAMADI'));
-        emptyState.appendChild(createElement('h3', '', 'Aramana uygun bir not yok.'));
-        emptyState.appendChild(createElement('p', '', 'Başka bir başlık ara veya ders filtresini değiştir. Tüm notları görmek için arama alanını boşaltıp “Tüm dersler” seçeneğini seçebilirsin.'));
+        emptyState.appendChild(createElement('span', 'notes-empty-label', 'NO RESULTS'));
+        emptyState.appendChild(createElement('h3', '', 'No notes match your search.'));
+        emptyState.appendChild(createElement('p', '', 'Try another title or change the course filter. To see all notes, clear the search field and select “All courses”.'));
         notesGrid.appendChild(emptyState);
         return;
     }
@@ -107,7 +107,7 @@ function renderNotes(notes) {
 
         const topRow = createElement('div', 'notes-card-top');
         topRow.appendChild(createElement('span', 'notes-file-type', note.fileType));
-        topRow.appendChild(createElement('span', 'notes-demo-tag', 'Örnek not'));
+        topRow.appendChild(createElement('span', 'notes-demo-tag', 'Sample note'));
         noteCard.appendChild(topRow);
 
         const title = createElement('h3', 'notes-card-title', note.title);
@@ -115,7 +115,7 @@ function renderNotes(notes) {
         noteCard.appendChild(title);
 
         const details = createElement('dl', 'notes-card-details');
-        [['Ders', noteCourseNames[note.course] || note.course], ['Örnek paylaşan', note.author]].forEach(([label, value]) => {
+        [['Course', noteCourseNames[note.course] || note.course], ['Sample contributor', note.author]].forEach(([label, value]) => {
             const row = createElement('div');
             row.appendChild(createElement('dt', '', label));
             row.appendChild(createElement('dd', '', value));
@@ -123,11 +123,11 @@ function renderNotes(notes) {
         });
         noteCard.appendChild(details);
 
-        const availability = createElement('p', 'notes-card-availability', 'Demo kaydı. İndirilebilir bir PDF dosyası bulunmuyor.');
+        const availability = createElement('p', 'notes-card-availability', 'Demo entry. No PDF file is available to download.');
         availability.id = `note-availability-${note.id}`;
         noteCard.appendChild(availability);
 
-        const downloadButton = createElement('button', 'button button-secondary notes-download', 'PDF indir');
+        const downloadButton = createElement('button', 'button button-secondary notes-download', 'Download PDF');
         downloadButton.type = 'button';
         downloadButton.disabled = true;
         downloadButton.setAttribute('aria-describedby', availability.id);
@@ -142,8 +142,8 @@ function filterNotes() {
     const searchInput = document.getElementById('search-notes');
     if (!courseSelect || !searchInput) return;
 
-    const normalizeTitle = value => value.toLocaleLowerCase('tr-TR')
-        .normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ı/g, 'i');
+    const normalizeTitle = value => value.toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     const searchTerm = normalizeTitle(searchInput.value.trim());
     
     const filteredNotes = sampleNotes.filter(note => {
@@ -166,7 +166,7 @@ function setupUploadForm() {
 
     if (fileInput && fileName) {
         fileInput.addEventListener('change', () => {
-            fileName.textContent = fileInput.files[0]?.name || 'Dosya seçilmedi';
+            fileName.textContent = fileInput.files[0]?.name || 'No file selected';
         });
     }
     
@@ -175,10 +175,10 @@ function setupUploadForm() {
         
         const feedback = document.getElementById('upload-feedback');
         if (feedback) {
-            feedback.textContent = 'Demo formu denendi. Dosyan gönderilmedi veya kaydedilmedi; kütüphaneye not eklenmedi.';
+            feedback.textContent = 'Demo complete. Your file was not uploaded or saved, and no note was added to the library.';
         }
         uploadForm.reset();
-        if (fileName) fileName.textContent = 'Dosya seçilmedi';
+        if (fileName) fileName.textContent = 'No file selected';
     });
 
     uploadForm.addEventListener('input', () => {
@@ -206,108 +206,10 @@ function initNotesPage() {
     setupUploadForm();
 }
 
-// Sample exam data (would typically come from backend)
-const sampleExams = [
-    {
-        id: 1,
-        title: "Calculus Midterm 2022",
-        university: "mit",
-        course: "math",
-        type: "midterm",
-        topic: "Derivatives",
-        downloadUrl: "#"
-    },
-    {
-        id: 2,
-        title: "Machine Learning Final",
-        university: "stanford",
-        course: "cs",
-        type: "final",
-        topic: "Neural Networks",
-        downloadUrl: "#"
-    }
-];
-
-// Exam rendering function
-function renderExams(exams) {
-    const examGrid = document.querySelector('.exam-grid');
-    if (!examGrid) return; // Exit if not on exam page
-
-    examGrid.innerHTML = ''; // Clear existing exams
-
-    exams.forEach(exam => {
-        const examCard = document.createElement('div');
-        examCard.classList.add('exam-card');
-        examCard.innerHTML = `
-            <h3>${exam.title}</h3>
-            <p class="exam-details">
-                Course: ${exam.course.toUpperCase()} | 
-                Type: ${exam.type.charAt(0).toUpperCase() + exam.type.slice(1)} | 
-                Topic: ${exam.topic}
-            </p>
-            <a href="${exam.downloadUrl}" class="exam-download-btn" download>
-              <span class="download-icon">⬇️</span> Download PDF
-            </a>
-        `;
-        examGrid.appendChild(examCard);
-    });
-}
-
-// Filter exams
-function filterExams() {
-    const courseFilter = document.getElementById('course-filter');
-    const examTypeFilter = document.getElementById('exam-type-filter');
-    const examSearch = document.getElementById('exam-search');
-
-    if (!courseFilter || !examTypeFilter || !examSearch) return;
-
-    const filteredExams = sampleExams.filter(exam => {
-        const matchesCourse = courseFilter.value === '' || exam.course === courseFilter.value;
-        const matchesType = examTypeFilter.value === '' || exam.type === examTypeFilter.value;
-        const matchesSearch = examSearch.value === '' || 
-            exam.title.toLowerCase().includes(examSearch.value.toLowerCase()) ||
-            exam.topic.toLowerCase().includes(examSearch.value.toLowerCase());
-        
-        return matchesCourse && matchesType && matchesSearch;
-    });
-
-    renderExams(filteredExams);
-}
-
-// Exam upload handling
-function setupExamUploadForm() {
-    const uploadForm = document.getElementById('exam-upload-form');
-    if (!uploadForm) return;
-    
-    uploadForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        
-        // In a real app, this would be a file upload to a server
-        alert('Exam upload simulation: File would be processed');
-        uploadForm.reset();
-    });
-}
-
-// Initialize exam page
-function initExamArchivePage() {
-    renderExams(sampleExams);
-    
-    const courseFilter = document.getElementById('course-filter');
-    const examTypeFilter = document.getElementById('exam-type-filter');
-    const examSearch = document.getElementById('exam-search');
-    
-    if (courseFilter) courseFilter.addEventListener('change', filterExams);
-    if (examTypeFilter) examTypeFilter.addEventListener('change', filterExams);
-    if (examSearch) examSearch.addEventListener('input', filterExams);
-    
-    setupExamUploadForm();
-}
-
 // Run initializations when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     initNavbar();
     initNotesPage();
-    initExamArchivePage();
     initStudyPlanner(); // Initialize planner if on planner page
 });
 

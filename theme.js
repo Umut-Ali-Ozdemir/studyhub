@@ -2,9 +2,7 @@
 (() => {
     const storageKey = 'studyHubTheme';
     const systemTheme = window.matchMedia('(prefers-color-scheme: dark)');
-    const labels = document.documentElement.lang.toLowerCase().startsWith('tr')
-        ? { name: 'Koyu tema', light: 'Açık temaya geç', dark: 'Koyu temaya geç' }
-        : { name: 'Dark theme', light: 'Switch to light theme', dark: 'Switch to dark theme' };
+    const labels = { name: 'Dark theme', light: 'Switch to light theme', dark: 'Switch to dark theme' };
     let preference = null;
 
     function validTheme(value) {

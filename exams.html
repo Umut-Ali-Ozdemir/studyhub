@@ -3,157 +3,130 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Exam Archive - Student Study Hub</title>
+  <meta name="description" content="Create a practice test from original StudyHub demo questions. Choose your subject, topic and difficulty, then review your results and worked solutions." />
+  <title>Practice Hub — StudyHub</title>
   <script src="theme.js"></script>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="exams.css" />
 </head>
-<body>
-<nav class="main-nav">
-  <a class="logo" href="index.html" aria-label="StudyHub home"><span class="brand-mark" aria-hidden="true">S<span>·</span></span>StudyHub</a>
-    <button type="button" class="theme-toggle" aria-label="Dark theme" aria-pressed="false" hidden>
-      <svg class="theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13A8.5 8.5 0 0 1 11 3.5 8.5 8.5 0 1 0 20.5 13Z"/></svg>
-      <svg class="theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg>
-    </button>
-  <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-navigation">
-    <span aria-hidden="true"></span>
-    <span aria-hidden="true"></span>
-    <span aria-hidden="true"></span>
-  </button>
-  <div class="nav-right" id="primary-navigation">
-    <ul class="nav-links">
-      <li><a href="index.html">Home</a></li>
-      <li><a href="notes.html">Notes</a></li>
-      <li><a href="exams.html" aria-current="page">Exam Archive</a></li>
-      <li><a href="planner.html">Study Planner</a></li>
-    </ul>
-
-    <div class="auth-buttons">
-      <a href="login.html" class="btn-login">Giriş Yap</a>
-      <a href="register.html" class="btn-signup">Kayıt Ol</a>
-    </div>
-  </div>
-
-</nav>
-
-
-
-  <main>
-    <section class="exam-archive container">
-      <h2>Exam Archive</h2>
-
-      <div class="exam-filters">
-        <select id="course-filter" class="filter-dropdown">
-          <option value="">All Courses</option>
-          <option value="math">Mathematics</option>
-          <option value="cs">Computer Science</option>
-          <option value="physics">Physics</option>
-          <option value="biology">Biology</option>
-        </select>
-
-        <select id="exam-type-filter" class="filter-dropdown">
-          <option value="">All Exam Types</option>
-          <option value="midterm">Midterm</option>
-          <option value="final">Final</option>
-          <option value="resit">Resit</option>
-          <option value="quiz">Quiz</option>
-        </select>
-
-        <input type="text" id="exam-search" placeholder="Search exams" class="search-input" />
+<body class="practice-page">
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <header>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a class="logo" href="index.html" aria-label="StudyHub home"><span class="brand-mark" aria-hidden="true">S<span>·</span></span>StudyHub</a>
+      <button type="button" class="theme-toggle" aria-label="Dark theme" aria-pressed="false" hidden>
+        <svg class="theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13A8.5 8.5 0 0 1 11 3.5 8.5 8.5 0 1 0 20.5 13Z"/></svg>
+        <svg class="theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg>
+      </button>
+      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-navigation">
+        <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+      </button>
+      <div class="nav-right" id="primary-navigation">
+        <ul class="nav-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="notes.html">Notes</a></li>
+          <li><a href="exams.html" aria-current="page">Practice Hub</a></li>
+          <li><a href="planner.html">Study Planner</a></li>
+        </ul>
+        <div class="auth-buttons">
+          <a href="login.html" class="btn-login" title="The sign-in page is not available yet">Sign in</a>
+          <a href="register.html" class="btn-signup" title="The sign-up page is not available yet">Sign up</a>
+        </div>
       </div>
+    </nav>
+  </header>
 
-      <div class="exam-grid">
-        <!-- Dynamic exams here -->
-      </div>
+  <main id="main-content" class="practice-main page-shell">
+    <section class="practice-intro" aria-labelledby="practice-title">
+      <p class="eyebrow">A LITTLE PRACTICE. A CLEARER NEXT STEP.</p>
+      <h1 id="practice-title">Practice Hub</h1>
+      <p>Build a short test, work through each question and learn from the solutions.</p>
+      <div class="practice-notice"><span class="practice-badge">Original demo questions</span><p>These questions were written for StudyHub. They are not taken from university exams, and no AI is used to generate them.</p></div>
+    </section>
 
-      <div class="upload-exam-section">
-        <h3>Upload Exam Paper</h3>
-        <form id="exam-upload-form">
-          <div class="form-group">
-            <select id="upload-university" required>
-              <option value="">Select University</option>
-              <option value="mit">MIT</option>
-              <option value="harvard">Harvard</option>
-              <option value="stanford">Stanford</option>
-            </select>
+    <section id="practice-setup" class="practice-setup" aria-labelledby="setup-title">
+      <div class="practice-panel">
+        <p class="practice-kicker">01 / CREATE YOUR TEST</p>
+        <h2 id="setup-title" tabindex="-1">What would you like to practice?</h2>
+        <p class="practice-muted">Choose a subject, narrow the topic and set a manageable question count.</p>
+        <form id="practice-form">
+          <div class="practice-fields">
+            <div class="practice-field"><label for="practice-subject">Subject</label><select id="practice-subject" name="subject" required></select></div>
+            <div class="practice-field"><label for="practice-topic">Topic</label><select id="practice-topic" name="topic" required></select></div>
+            <div class="practice-field"><label for="practice-difficulty">Difficulty</label><select id="practice-difficulty" name="difficulty" required><option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option></select></div>
+            <div class="practice-field"><label for="practice-count">Number of questions</label><input id="practice-count" name="count" type="number" min="1" max="36" step="1" value="4" aria-describedby="practice-availability practice-error" required /></div>
           </div>
-          <div class="form-group">
-            <select id="upload-course" required>
-              <option value="">Select Course</option>
-              <option value="math">Mathematics</option>
-              <option value="cs">Computer Science</option>
-              <option value="physics">Physics</option>
-              <option value="biology">Biology</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <select id="upload-exam-type" required>
-              <option value="">Exam Type</option>
-              <option value="midterm">Midterm</option>
-              <option value="final">Final</option>
-              <option value="resit">Resit</option>
-              <option value="quiz">Quiz</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <input type="text" id="exam-title" placeholder="Exam Title" required />
-          </div>
-          <div class="form-group">
-            <input type="text" id="exam-topic" placeholder="Topic/Subject" required />
-          </div>
-          <div class="form-group">
-            <input type="file" id="exam-file" accept=".pdf" required />
-          </div>
-          <button type="submit" class="upload-btn">Upload Exam</button>
+          <p id="practice-availability" class="practice-availability" role="status" aria-live="polite" aria-atomic="true"></p>
+          <p id="practice-error" class="practice-error" role="alert"></p>
+          <button id="practice-start" class="button button-primary" type="submit" disabled>Start practice test <span aria-hidden="true">→</span></button>
         </form>
+        <noscript><p class="practice-error">Enable JavaScript to create and complete a practice test. No test can run without it.</p></noscript>
       </div>
+      <aside class="practice-guide" aria-labelledby="guide-title">
+        <span class="practice-guide-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 11l2 2 4-4M8 3h8v3H8z"/><path d="M8 5H5v16h14V5h-3M8 17h8"/></svg></span>
+        <h2 id="guide-title">Practice with intention.</h2>
+        <ol><li><strong>Make a small plan.</strong><span>Choose from a fixed pool of <span id="practice-bank-size">36</span> questions across three subjects.</span></li><li><strong>Work at your pace.</strong><span>Change answers or move between questions. There is no timer.</span></li><li><strong>Learn from the result.</strong><span>Review your answers alongside a short explanation for every question.</span></li></ol>
+        <p class="practice-session-note">Sessions stay in memory and reset when you reload this page. Nothing is added to your Study Planner.</p>
+      </aside>
+    </section>
+
+    <section id="practice-session" class="practice-session" aria-labelledby="question-title" hidden>
+      <div class="practice-panel practice-question-panel">
+        <div class="practice-question-top"><p id="question-counter" class="practice-kicker" role="status" aria-live="polite" aria-atomic="true"></p><span id="question-topic" class="practice-badge"></span></div>
+        <h2 id="question-title" tabindex="-1"></h2>
+        <form id="practice-answer-form"><fieldset id="answer-options"><legend>Choose one answer</legend></fieldset></form>
+        <button id="clear-answer" class="practice-text-button" type="button" disabled>Clear answer</button>
+        <div class="practice-question-navigation"><button id="previous-question" class="button button-secondary" type="button">← Previous</button><button id="next-question" class="button button-primary" type="button">Next question →</button></div>
+      </div>
+      <aside class="practice-session-panel" aria-labelledby="session-title">
+        <p class="practice-kicker">YOUR SESSION</p><h2 id="session-title">One question at a time.</h2>
+        <dl id="session-settings" class="practice-session-settings"></dl>
+        <label for="practice-progress">Answered questions</label><progress id="practice-progress" max="4" value="0"></progress><p id="practice-answered" class="practice-muted"></p>
+        <p class="practice-session-note">You can finish at any time. Unanswered questions count as blank. Reloading the page clears this session.</p>
+        <button id="finish-practice" class="button button-secondary" type="button">Finish test</button>
+      </aside>
+    </section>
+
+    <section id="practice-results" class="practice-results" aria-labelledby="results-title" hidden>
+      <div class="practice-results-header"><div><p class="practice-kicker">03 / REFLECT AND TRY AGAIN</p><h2 id="results-title" tabindex="-1">Your practice results</h2><p id="results-context" class="practice-muted"></p></div><div class="practice-result-actions"><button id="restart-practice" class="button button-secondary" type="button">Restart this test</button><button id="new-practice" class="button button-primary" type="button">Create a new test</button></div></div>
+      <dl class="practice-score-grid"><div><dt>Correct</dt><dd id="score-correct">0</dd></div><div><dt>Incorrect</dt><dd id="score-incorrect">0</dd></div><div><dt>Blank</dt><dd id="score-blank">0</dd></div><div class="practice-score-highlight"><dt>Accuracy</dt><dd id="score-percentage">0%</dd></div></dl>
+      <p class="practice-score-note">Accuracy = correct answers ÷ total questions, including blanks, rounded to the nearest whole percent. These are practice results, not an official assessment.</p>
+      <div class="practice-review-heading"><h2>Review the solutions</h2><p class="practice-muted">Your response, the correct answer and the reasoning behind it.</p></div>
+      <ol id="practice-review" class="practice-review-list"></ol>
     </section>
   </main>
 
-<footer>
-  <div class="main-footer">
-    <div class="footer-left">
-      <h3>Quick Links</h3>
-      <ul class="quick-links">
-        <li><a href="about.html">About Us</a></li>
-        <li><a href="notes.html">Notes</a></li>
-        <li><a href="exams.html">Exam Archive</a></li>
-        <li><a href="planner.html">Study Planner</a></li>
-        <li><a href="contact.html">Contact</a></li>
-        <li><a href="privacy.html">Privacy Policy</a></li>
-      </ul>
-      
-    </div>
-
-    <div class="footer-middle">
-      <h3>StudyHub</h3>
-      <p>
-        Streamline your academic journey with us. We provide tools and resources to make your studies easier and more effective.
-      </p>
-      <div class="social-media" aria-label="Social Media Links">
-        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+  <footer class="home-footer">
+    <div class="home-footer-grid page-shell">
+      <div class="footer-brand">
+        <a class="logo" href="index.html"><span class="brand-mark" aria-hidden="true">S<span>·</span></span>StudyHub</a>
+        <p>A little structure for your student life.<br />Built one thoughtful step at a time.</p>
       </div>
-
-      
+      <div>
+        <h2>Workspace</h2>
+        <ul>
+          <li><a href="notes.html">Notes</a></li>
+          <li><a href="exams.html" aria-current="page">Practice Hub</a></li>
+          <li><a href="planner.html">Study Planner</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>About the project</h2>
+        <ul>
+          <li><a href="about.html">About Us</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="privacy.html">Privacy Policy</a></li>
+        </ul>
+        <p class="footer-small">Information, sign-in and sign-up pages are not available yet.</p>
+      </div>
     </div>
-
-    <div class="footer-right">
-      <h3>Contact & Support</h3>
-      <form class="footer-form" onsubmit="return false;">
-        <input type="text" placeholder="Your Name" required maxlength="50" />
-        <input type="email" placeholder="Your Email" required maxlength="50" />
-        <textarea rows="3" placeholder="Your Message" maxlength="300"></textarea>
-        <button type="submit">Send</button>
-      </form>
+    <div class="home-footer-bottom page-shell">
+      <span>© 2026 StudyHub · Umut Ali Özdemir</span>
+      <span>Plan with intention. Learn at your pace.</span>
     </div>
-</div>
-
-  <div class="footer-bottom">
-    © 2025 StudyHub. All rights reserved by Umut Ali Özdemir.
-  </div>
-</footer>
-
+  </footer>
   <script src="script.js"></script>
+  <script src="practice-questions.js"></script>
+  <script src="practice.js"></script>
 </body>
 </html>

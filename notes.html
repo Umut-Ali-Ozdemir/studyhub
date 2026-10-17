@@ -1,36 +1,36 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="StudyHub not kütüphanesinde ders ve başlığa göre örnek notları keşfet. Not paylaşım arayüzünü demo olarak incele." />
-  <title>Not Kütüphanesi — StudyHub</title>
+  <meta name="description" content="Explore sample study notes by course and title in the StudyHub notes library. Try the note-sharing interface in demo mode." />
+  <title>Notes Library — StudyHub</title>
   <script src="theme.js"></script>
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="notes.css" />
 </head>
 <body class="notes-page">
-  <a class="skip-link" href="#main-content">İçeriğe geç</a>
+  <a class="skip-link" href="#main-content">Skip to content</a>
   <header>
-    <nav class="main-nav" aria-label="Ana gezinme">
-      <a class="logo" href="index.html" aria-label="StudyHub ana sayfa"><span class="brand-mark" aria-hidden="true">S<span>·</span></span>StudyHub</a>
-      <button type="button" class="theme-toggle" aria-label="Koyu tema" aria-pressed="false" hidden>
+    <nav class="main-nav" aria-label="Main navigation">
+      <a class="logo" href="index.html" aria-label="StudyHub home"><span class="brand-mark" aria-hidden="true">S<span>·</span></span>StudyHub</a>
+      <button type="button" class="theme-toggle" aria-label="Dark theme" aria-pressed="false" hidden>
         <svg class="theme-icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 13A8.5 8.5 0 0 1 11 3.5 8.5 8.5 0 1 0 20.5 13Z"/></svg>
         <svg class="theme-icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg>
       </button>
-      <button type="button" class="nav-toggle" aria-label="Gezinme menüsü" aria-expanded="false" aria-controls="primary-navigation">
+      <button type="button" class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false" aria-controls="primary-navigation">
         <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
       </button>
       <div class="nav-right" id="primary-navigation">
         <ul class="nav-links">
-          <li><a href="index.html">Ana Sayfa</a></li>
-          <li><a href="notes.html" aria-current="page">Notlar</a></li>
-          <li><a href="exams.html">Sınav Arşivi</a></li>
-          <li><a href="planner.html">Çalışma Planlayıcı</a></li>
+          <li><a href="index.html">Home</a></li>
+          <li><a href="notes.html" aria-current="page">Notes</a></li>
+          <li><a href="exams.html">Practice Hub</a></li>
+          <li><a href="planner.html">Study Planner</a></li>
         </ul>
         <div class="auth-buttons">
-          <a href="login.html" class="btn-login" title="Giriş sayfası henüz hazır değil">Giriş Yap</a>
-          <a href="register.html" class="btn-signup" title="Kayıt sayfası henüz hazır değil">Kayıt Ol</a>
+          <a href="login.html" class="btn-login" title="The sign-in page is not available yet">Sign in</a>
+          <a href="register.html" class="btn-signup" title="The sign-up page is not available yet">Sign up</a>
         </div>
       </div>
     </nav>
@@ -38,50 +38,50 @@
 
   <main id="main-content" class="notes-main page-shell">
     <section class="notes-intro" aria-labelledby="notes-title">
-      <p class="eyebrow">DERS KAYNAKLARIN İÇİN BİR BAŞLANGIÇ</p>
+      <p class="eyebrow">A STARTING POINT FOR YOUR STUDY RESOURCES</p>
       <div class="notes-title-row">
         <div>
-          <h1 id="notes-title">Not kütüphanesi</h1>
-          <p>Dersine odaklan, ihtiyacın olan başlığı bul. Çalışma kaynaklarını tek bir yerde keşfet.</p>
+          <h1 id="notes-title">Notes library</h1>
+          <p>Find the topic you need and explore study resources in one place.</p>
         </div>
-        <a class="button button-secondary" href="#upload-panel">Paylaşım demosuna geç <span aria-hidden="true">↗</span></a>
+        <a class="button button-secondary" href="#upload-panel">Try the sharing demo <span aria-hidden="true">↗</span></a>
       </div>
       <div class="notes-demo-notice">
-        <span class="notes-notice-label">Demo kütüphane</span>
-        <p>Bu sayfadaki notlar ve paylaşan kişiler örnektir. PDF yükleme, indirme ve hesap işlemleri henüz kullanılamıyor.</p>
+        <span class="notes-notice-label">Demo library</span>
+        <p>The notes and contributors shown here are examples. PDF uploads, downloads and account features are not available yet.</p>
       </div>
     </section>
 
     <div class="notes-workspace">
       <section class="notes-library" aria-labelledby="library-title">
         <div class="notes-library-heading">
-          <h2 id="library-title">Notları keşfet</h2>
+          <h2 id="library-title">Explore notes</h2>
           <p id="notes-results-count" role="status" aria-live="polite" aria-atomic="true"></p>
         </div>
-        <div class="notes-toolbar" role="search" aria-label="Notları filtrele">
+        <div class="notes-toolbar" role="search" aria-label="Filter notes">
           <div class="notes-field notes-search-field">
-            <label for="search-notes">Başlığa göre ara</label>
+            <label for="search-notes">Search by title</label>
             <div class="notes-search-control">
               <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>
-              <input type="search" id="search-notes" placeholder="Örn. türev veya makine öğrenmesi" aria-controls="notes-results" autocomplete="off" />
+              <input type="search" id="search-notes" placeholder="e.g. derivatives or machine learning" aria-controls="notes-results" autocomplete="off" />
             </div>
           </div>
           <div class="notes-field notes-course-field">
-            <label for="course-select">Ders</label>
+            <label for="course-select">Course</label>
             <select id="course-select" aria-controls="notes-results">
-              <option value="">Tüm dersler</option>
-              <option value="math">Matematik</option>
-              <option value="cs">Bilgisayar Bilimleri</option>
-              <option value="physics">Fizik</option>
-              <option value="biology">Biyoloji</option>
+              <option value="">All courses</option>
+              <option value="math">Mathematics</option>
+              <option value="cs">Computer Science</option>
+              <option value="physics">Physics</option>
+              <option value="biology">Biology</option>
             </select>
           </div>
         </div>
         <div class="notes-grid" id="notes-results">
-          <!-- Örnek not kartları JavaScript ile oluşturulur. -->
+          <!-- Sample note cards are rendered with JavaScript. -->
         </div>
-        <noscript><p class="notes-fallback">Örnek notları görmek ve filtrelemek için JavaScript'i etkinleştir. Bu sayfa gerçek dosya yükleme veya indirme hizmeti sunmaz.</p></noscript>
-        <p class="notes-library-footnote">Arama ve ders filtresi birlikte çalışır. Henüz her ders için örnek not bulunmuyor.</p>
+        <noscript><p class="notes-fallback">Enable JavaScript to view and filter sample notes and try the demo form. This page does not provide real file uploads or downloads.</p></noscript>
+        <p class="notes-library-footnote">Search and course filters work together. Sample notes are not available for every course yet.</p>
       </section>
 
       <aside class="notes-upload-panel" id="upload-panel" aria-labelledby="upload-title" tabindex="-1">
@@ -89,40 +89,40 @@
           <span class="notes-panel-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24"><path d="M12 16V4m-4 4 4-4 4 4M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>
           </span>
-          <span class="notes-demo-tag">Yalnızca demo</span>
+          <span class="notes-demo-tag">Demo only</span>
         </div>
-        <h2 id="upload-title">Bilgini paylaşmaya hazırlan.</h2>
-        <p class="notes-upload-description" id="upload-description">Not paylaşım formunu incele. Seçtiğin dosya gönderilmez, saklanmaz ve kütüphaneye eklenmez.</p>
+        <h2 id="upload-title">Get ready to share your knowledge.</h2>
+        <p class="notes-upload-description" id="upload-description">Try the note-sharing form. Your selected file will not be uploaded, stored or added to the library.</p>
         <form id="upload-form" aria-describedby="upload-description">
           <div class="notes-field">
-            <label for="upload-course">Ders <span class="notes-required">(zorunlu)</span></label>
+            <label for="upload-course">Course <span class="notes-required">(required)</span></label>
             <select id="upload-course" name="course" required>
-              <option value="">Ders seç</option>
-              <option value="math">Matematik</option>
-              <option value="cs">Bilgisayar Bilimleri</option>
-              <option value="physics">Fizik</option>
-              <option value="biology">Biyoloji</option>
+              <option value="">Select a course</option>
+              <option value="math">Mathematics</option>
+              <option value="cs">Computer Science</option>
+              <option value="physics">Physics</option>
+              <option value="biology">Biology</option>
             </select>
           </div>
           <div class="notes-field">
-            <label for="note-title">Not başlığı <span class="notes-required">(zorunlu)</span></label>
-            <input type="text" id="note-title" name="title" placeholder="Örn. Türev kuralları ve örnekler" required />
+            <label for="note-title">Note title <span class="notes-required">(required)</span></label>
+            <input type="text" id="note-title" name="title" placeholder="e.g. Derivative rules and examples" required />
           </div>
           <div class="notes-field">
-            <label for="note-file">PDF dosyası <span class="notes-required">(zorunlu)</span></label>
+            <label for="note-file">PDF file <span class="notes-required">(required)</span></label>
             <div class="notes-file-field">
               <div class="notes-file-picker">
-                <span class="button button-secondary" aria-hidden="true">PDF seç</span>
+                <span class="button button-secondary" aria-hidden="true">Choose a PDF</span>
                 <input type="file" id="note-file" name="file" accept=".pdf,application/pdf" aria-describedby="note-file-name note-file-help" required />
               </div>
-              <span id="note-file-name" class="notes-file-name">Dosya seçilmedi</span>
-              <p id="note-file-help">Yalnızca yerel dosya seçimi yapılır. Bu demo, PDF içeriğini okumaz.</p>
+              <span id="note-file-name" class="notes-file-name">No file selected</span>
+              <p id="note-file-help">File selection stays on your device. This demo does not read the PDF contents.</p>
             </div>
           </div>
-          <button type="submit" id="try-note-upload" class="button button-primary" disabled>Demo formunu dene</button>
+          <button type="submit" id="try-note-upload" class="button button-primary" disabled>Try the demo form</button>
           <p id="upload-feedback" class="notes-form-feedback" role="status" aria-live="polite" aria-atomic="true"></p>
         </form>
-        <p class="notes-upload-footnote">Gerçek dosya paylaşımı daha sonraki bir aşamada geliştirilecek.</p>
+        <p class="notes-upload-footnote">File sharing is planned for a future development stage.</p>
       </aside>
     </div>
   </main>
@@ -131,29 +131,29 @@
     <div class="home-footer-grid page-shell">
       <div class="footer-brand">
         <a class="logo" href="index.html"><span class="brand-mark" aria-hidden="true">S<span>·</span></span>StudyHub</a>
-        <p>Öğrencilik hayatına biraz düzen.<br />Her gün, küçük bir adım daha.</p>
+        <p>A little structure for your student life.<br />Built one thoughtful step at a time.</p>
       </div>
       <div>
-        <h2>Çalışma alanın</h2>
+        <h2>Workspace</h2>
         <ul>
-          <li><a href="notes.html" aria-current="page">Notlar</a></li>
-          <li><a href="exams.html">Sınav Arşivi</a></li>
-          <li><a href="planner.html">Çalışma Planlayıcı</a></li>
+          <li><a href="notes.html" aria-current="page">Notes</a></li>
+          <li><a href="exams.html">Practice Hub</a></li>
+          <li><a href="planner.html">Study Planner</a></li>
         </ul>
       </div>
       <div>
-        <h2>Proje hakkında</h2>
+        <h2>About the project</h2>
         <ul>
-          <li><a href="about.html">Hakkımızda</a></li>
-          <li><a href="contact.html">İletişim</a></li>
-          <li><a href="privacy.html">Gizlilik Politikası</a></li>
+          <li><a href="about.html">About Us</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="privacy.html">Privacy Policy</a></li>
         </ul>
-        <p class="footer-small">Bilgi sayfaları ile giriş ve kayıt sayfaları henüz hazır değil.</p>
+        <p class="footer-small">Information, sign-in and sign-up pages are not available yet.</p>
       </div>
     </div>
     <div class="home-footer-bottom page-shell">
       <span>© 2026 StudyHub · Umut Ali Özdemir</span>
-      <span>Planını oluştur. Kendi hızında öğren.</span>
+      <span>Plan with intention. Learn at your pace.</span>
     </div>
   </footer>
   <script src="script.js"></script>
