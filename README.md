@@ -7,7 +7,7 @@ A student workspace built with HTML, CSS and JavaScript. Plan study sessions, ex
 - **Home:** an overview of the workspace with light and dark themes.
 - **Notes library:** sample note cards, title search and course filtering. File selection and the submission form are demos; no files are uploaded or available to download.
 - **Practice Hub:** a working quiz demo at `exams.html`. Choose a subject, topic, difficulty and question count, answer at your own pace, and review results with explanations. The former exam upload/download archive has been replaced.
-- **Study Planner:** a calendar with daily tasks, notes, completion tracking and upcoming deadlines, saved in the browser's `localStorage`. Its monthly analysis uses predefined messages, not AI.
+- **Study Planner:** a responsive monthly calendar and daily workspace for tasks, editable notes and exam/deadline markers, saved in the browser's `localStorage`. Month statistics and the Monthly Overview are calculated directly from tasks. Upcoming deadlines cover the next five days, with urgent items due within three days.
 
 ## Practice Hub
 
@@ -26,8 +26,8 @@ Open `index.html` in a modern browser, or serve this directory with an existing 
 ## Source layout
 
 - `index.html`, `notes.html`, `exams.html`, `planner.html`: main pages.
-- `styles.css`: shared design tokens, theme colors and existing Planner styles.
-- `notes.css`, `exams.css`: page-specific Notes and Practice Hub styles.
+- `styles.css`: shared design tokens, theme colors and components.
+- `notes.css`, `exams.css`, `planner.css`: page-specific Notes, Practice Hub and Planner styles.
 - `theme.js`: system-aware theme selection and saved preference.
 - `script.js`: shared navigation, Notes demo and existing Planner behavior.
 - `practice-questions.js`: original question bank and subject/topic metadata.
@@ -36,10 +36,10 @@ Open `index.html` in a modern browser, or serve this directory with an existing 
 
 ## Checks
 
-With Node.js installed, run `node --test tests/planner.test.cjs tests/practice.test.cjs` to check Planner validation, safe text rendering, storage failures and legacy compatibility, as well as Practice Hub questions, scoring and navigation. The UI tests use a small DOM substitute; they do not replace real-browser responsive, keyboard, download or screen-reader testing.
+With Node.js installed, run `node --test tests/planner.test.cjs tests/practice.test.cjs` to check Planner validation, safe text rendering, storage failures, legacy compatibility, calendar keyboard navigation, monthly statistics and deadline ordering, as well as Practice Hub questions, scoring and navigation. The UI tests use a small DOM substitute; they do not replace real-browser responsive, keyboard, download or screen-reader testing.
 
 Planner rejects malformed saved records without replacing them and offers a raw JSON download when the saved text can be read. Failed writes leave the last saved record unchanged and pause editing until the operation is retried or the page is reloaded. Export the saved record before attempting manual recovery; partial or automatic repair is not implemented.
 
 ## Current limits
 
-There is no backend, database, authentication, cloud sync, AI service or paid API integration. Account and information-page links are placeholders. Planner storage is local to the browser and is not a backup; keep separate copies of important plans. User-facing text is being standardized in English; the existing Planner still includes Turkish text.
+There is no backend, database, authentication, cloud sync, AI service or paid API integration. Account and information-page links are placeholders. Planner storage is local to the browser and is not a backup; keep separate copies of important plans. Main-page interfaces use English. Planner dates can be selected with arrow keys or the native date buttons; notes save when their fields lose focus. Navigating dates never moves tasks or rewrites saved records.

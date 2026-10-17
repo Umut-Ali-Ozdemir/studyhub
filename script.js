@@ -257,12 +257,12 @@ function initStudyPlanner() {
     const calendarGrid = document.getElementById('calendar-grid');
     if (!calendarGrid) return; // Exit if not on planner page
 
-    let currentDate = new Date();
+    const currentDate = new Date();
     // Default to current local time for correct initial month view
     let currentMonth = currentDate.getMonth();
     let currentYear = currentDate.getFullYear();
     
-    let activeDateStr = null; // Currently opened date in modal
+    let activeDateStr = dateKey(currentDate);
 
     const monthYearEl = document.getElementById('month-year');
     const prevMonthBtn = document.getElementById('prev-month');
@@ -277,16 +277,19 @@ function initStudyPlanner() {
     let retrySave = null;
     let editingBlocked = false;
     let idSequence = 0;
+    let expandedTaskId = null; // View state only; never added to saved Planner records.
     const storageNotice = document.getElementById('planner-storage-notice');
     const storageMessage = document.getElementById('planner-storage-message');
-    const modalNotice = document.getElementById('planner-modal-storage-notice');
-    const modalMessage = document.getElementById('planner-modal-storage-message');
+    const dayNotice = document.getElementById('planner-day-storage-notice');
+    const dayMessage = document.getElementById('planner-day-storage-message');
     const exportButton = document.getElementById('planner-export-raw');
-    const retryButtons = [document.getElementById('planner-retry-save'), document.getElementById('planner-modal-retry-save')];
+    const retryButtons = [document.getElementById('planner-retry-save'), document.getElementById('planner-day-retry-save')];
     const saveStatus = document.getElementById('planner-save-status');
 
     function lockEditing(blocked) {
         editingBlocked = blocked;
+        prevMonthBtn.disabled = nextMonthBtn.disabled = blocked;
+        calendarGrid.querySelectorAll('button').forEach(button => { button.disabled = blocked; });
         document.querySelectorAll('#add-task-form input, #add-task-form button, #task-list input, #task-list button, #day-general-note').forEach(control => {
             if (control.tagName === 'TEXTAREA' || control.tagName === 'INPUT' && control.type === 'text') {
                 control.readOnly = blocked;
@@ -297,8 +300,9 @@ function initStudyPlanner() {
     function showStorageError(message, retry = null) {
         retrySave = retry;
         storageMessage.textContent = message;
-        modalMessage.textContent = message;
-        storageNotice.hidden = modalNotice.hidden = false;
+        // The full error and raw-data export remain above the dashboard.
+        dayMessage.textContent = 'Editing paused. Retry below or use the saved-data download above.';
+        storageNotice.hidden = dayNotice.hidden = false;
         exportButton.disabled = typeof exportRaw !== 'string';
         retryButtons.forEach(button => { button.hidden = !retry; });
         saveStatus.textContent = 'Not saved. Editing is paused to protect your data.';
@@ -333,8 +337,6 @@ function initStudyPlanner() {
         showStorageError('Planner data could not be read or validated. The saved record has not been changed. Editing is disabled. Download the raw record if available before attempting recovery.');
         monthYearEl.textContent = 'Planner unavailable';
         prevMonthBtn.disabled = nextMonthBtn.disabled = true;
-        const analysisButton = document.getElementById('btn-ai-analyze');
-        if (analysisButton) analysisButton.disabled = true;
         return;
     }
 
@@ -362,7 +364,7 @@ function initStudyPlanner() {
             return;
         }
         retrySave = null;
-        storageNotice.hidden = modalNotice.hidden = true;
+        storageNotice.hidden = dayNotice.hidden = true;
         lockEditing(false);
         saveStatus.textContent = 'Changes saved in this browser.';
         afterSave();
@@ -387,157 +389,144 @@ function initStudyPlanner() {
         return id;
     }
 
-    function renderCalendar() {
-        calendarGrid.replaceChildren();
-        
-        const firstDay = new Date(currentYear, currentMonth, 1).getDay();
-        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-        
-        // Adjust for Monday as first day of week
-        // getDay() returns 0 for Sunday, 1 for Monday...
-        let startDayIndex = firstDay === 0 ? 6 : firstDay - 1;
-
-        const monthNames = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
-        monthYearEl.textContent = `${monthNames[currentMonth]} ${currentYear}`;
-
-        const today = new Date();
-        const isCurrentMonth = today.getMonth() === currentMonth && today.getFullYear() === currentYear;
-
-        // Empty cells before start of month
-        for (let i = 0; i < startDayIndex; i++) {
-            const emptyCell = document.createElement('div');
-            emptyCell.classList.add('calendar-day', 'empty');
-            calendarGrid.appendChild(emptyCell);
-        }
-
-        // Days of the month
-        for (let i = 1; i <= daysInMonth; i++) {
-            const dayCell = document.createElement('div');
-            dayCell.classList.add('calendar-day');
-            
-            if (isCurrentMonth && i === today.getDate()) {
-                dayCell.classList.add('today');
-            }
-
-            const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-            
-            const dayNumber = document.createElement('div');
-            dayNumber.className = 'day-number';
-            dayNumber.textContent = i;
-            dayCell.appendChild(dayNumber);
-            
-            // Render preview tasks and notes
-            const dayData = plannerData[dateStr];
-            if (dayData) {
-                // Check for general note
-                if (dayData.generalNote && dayData.generalNote.trim() !== '') {
-                    const noteIcon = document.createElement('div');
-                    noteIcon.classList.add('day-note-icon');
-                    noteIcon.textContent = '📝';
-                    noteIcon.title = 'Günün Notu Var';
-                    dayCell.appendChild(noteIcon);
-                }
-
-                if (dayData.tasks && dayData.tasks.length > 0) {
-                    // Task dots
-                    const previewContainer = document.createElement('div');
-                    previewContainer.classList.add('day-preview-tasks');
-                    
-                    dayData.tasks.slice(0, 5).forEach(task => { // Show up to 5 dots
-                        const taskDot = document.createElement('div');
-                        taskDot.classList.add('task-dot');
-                        if(task.completed) taskDot.classList.add('done');
-                        if(task.isDeadline) taskDot.classList.add('exam-dot');
-                        previewContainer.appendChild(taskDot);
-                    });
-                    
-                    if (dayData.tasks.length > 5) {
-                        const moreSpan = document.createElement('div');
-                        moreSpan.classList.add('task-dot', 'more');
-                        previewContainer.appendChild(moreSpan);
-                    }
-                    dayCell.appendChild(previewContainer);
-
-                    // Progress percentage
-                    const total = dayData.tasks.length;
-                    const completed = dayData.tasks.filter(t => t.completed).length;
-                    const percent = Math.round((completed / total) * 100);
-
-                    const progressDiv = document.createElement('div');
-                    progressDiv.classList.add('day-progress');
-                    if (percent === 100) {
-                        progressDiv.classList.add('completed-all');
-                        progressDiv.textContent = '🌟 %100';
-                    } else {
-                        progressDiv.textContent = `%${percent}`;
-                    }
-                    dayCell.appendChild(progressDiv);
-                }
-
-                // Deadline Day Highlighting
-                let hasUnfinishedDeadline = dayData.tasks.some(t => t.isDeadline && !t.completed);
-                if (hasUnfinishedDeadline) {
-                    const [y, m, d] = dateStr.split('-');
-                    const taskDate = new Date(y, m - 1, d);
-                    const today = new Date();
-                    today.setHours(0,0,0,0);
-                    const diffTime = taskDate - today;
-                    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-                    
-                    if (diffDays >= 0 && diffDays <= 3) {
-                        dayCell.classList.add('deadline-urgent');
-                    } else if (diffDays > 3 && diffDays <= 5) {
-                        dayCell.classList.add('deadline-near');
-                    }
-                }
-            }
-
-            dayCell.addEventListener('click', () => openDayModal(dateStr, i, monthNames[currentMonth], currentYear));
-            calendarGrid.appendChild(dayCell);
-        }
-    }
-
-    // Modal Logic
-    const modal = document.getElementById('day-modal');
-    const closeModalBtn = document.querySelector('.close-modal');
-    const modalDateTitle = document.getElementById('modal-date-title');
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'];
     const taskList = document.getElementById('task-list');
     const addTaskForm = document.getElementById('add-task-form');
     const newTaskInput = document.getElementById('new-task-input');
     const dayGeneralNote = document.getElementById('day-general-note');
-    
     const statCompleted = document.getElementById('stat-completed');
     const statTotal = document.getElementById('stat-total');
 
-    function openDayModal(dateStr, day, monthName, year) {
+    function dateKey(date) {
+        return [String(date.getFullYear()).padStart(4, '0'), String(date.getMonth() + 1).padStart(2, '0'),
+            String(date.getDate()).padStart(2, '0')].join('-');
+    }
+
+    function localDate(dateStr) {
+        const [year, month, day] = dateStr.split('-').map(Number);
+        const date = new Date(0);
+        date.setFullYear(year, month - 1, day);
+        date.setHours(0, 0, 0, 0);
+        return date;
+    }
+
+    function formatDate(dateStr) {
+        return localDate(dateStr).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    }
+
+    function daysFromToday(dateStr) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return Math.round((localDate(dateStr) - today) / 86400000);
+    }
+
+    function selectDate(dateStr, focusCalendar = false) {
+        if (editingBlocked) return;
+        if (dateStr !== activeDateStr) {
+            expandedTaskId = null;
+            taskList.scrollTop = 0;
+        }
         activeDateStr = dateStr;
-        modalDateTitle.textContent = `${day} ${monthName} ${year}`;
-        modal.classList.add('show');
-        renderModalContent();
+        const date = localDate(dateStr);
+        currentMonth = date.getMonth();
+        currentYear = date.getFullYear();
+        refreshPlanner();
+        if (focusCalendar) calendarGrid.querySelector('.selected')?.focus();
     }
 
-    function closeDayModal() {
-        modal.classList.remove('show');
-        activeDateStr = null;
+    function renderCalendar() {
+        calendarGrid.replaceChildren();
+        const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+        const startDayIndex = (firstDay + 6) % 7;
+        monthYearEl.textContent = monthNames[currentMonth] + ' ' + currentYear;
+        for (let i = 0; i < startDayIndex; i++) {
+            const empty = document.createElement('div');
+            empty.className = 'calendar-day empty';
+            empty.setAttribute('aria-hidden', 'true');
+            calendarGrid.appendChild(empty);
+        }
+        for (let i = 1; i <= daysInMonth; i++) {
+            const dateStr = String(currentYear).padStart(4, '0') + '-' + String(currentMonth + 1).padStart(2, '0') + '-' + String(i).padStart(2, '0');
+            const dayData = getDayData(dateStr);
+            const completed = dayData.tasks.filter(task => task.completed).length;
+            const total = dayData.tasks.length;
+            const day = document.createElement('button');
+            day.type = 'button';
+            day.className = 'calendar-day';
+            day.disabled = editingBlocked;
+            day.setAttribute('aria-controls', 'daily-panel');
+            day.setAttribute('aria-pressed', String(dateStr === activeDateStr));
+            day.tabIndex = dateStr === activeDateStr ? 0 : -1;
+            if (dateStr === activeDateStr) day.classList.add('selected');
+            if (dateStr === dateKey(new Date())) {
+                day.classList.add('today');
+                day.setAttribute('aria-current', 'date');
+            }
+            const hasNote = !!dayData.generalNote.trim();
+            const hasDeadline = dayData.tasks.some(task => task.isDeadline && !task.completed);
+            day.setAttribute('aria-label', formatDate(dateStr) + ': ' + completed + ' of ' + total + ' tasks completed' +
+                (hasNote ? ', daily note' : '') + (hasDeadline ? ', pending deadline' : ''));
+            const number = document.createElement('span');
+            number.className = 'day-number';
+            number.textContent = i;
+            day.appendChild(number);
+            if (hasNote) {
+                const note = document.createElement('span');
+                note.className = 'day-note-icon';
+                note.textContent = '\u2022';
+                note.title = 'Daily note';
+                day.appendChild(note);
+            }
+            if (total) {
+                const dots = document.createElement('span');
+                dots.className = 'day-preview-tasks';
+                dots.setAttribute('aria-hidden', 'true');
+                dayData.tasks.slice(0, 5).forEach(task => {
+                    const dot = document.createElement('span');
+                    dot.className = 'task-dot' + (task.completed ? ' done' : '') + (task.isDeadline && !task.completed ? ' exam-dot' : '');
+                    dots.appendChild(dot);
+                });
+                day.appendChild(dots);
+                const progress = document.createElement('span');
+                progress.className = 'day-progress' + (completed === total ? ' completed-all' : '');
+                progress.textContent = Math.round(completed / total * 100) + '%';
+                day.appendChild(progress);
+            }
+            const diff = daysFromToday(dateStr);
+            if (hasDeadline && diff >= 0 && diff <= 5) day.classList.add(diff <= 3 ? 'deadline-urgent' : 'deadline-near');
+            day.addEventListener('click', () => selectDate(dateStr, true));
+            day.addEventListener('keydown', event => {
+                const offset = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 }[event.key];
+                if (!offset || editingBlocked) return;
+                event.preventDefault();
+                const next = localDate(dateStr);
+                next.setDate(next.getDate() + offset);
+                if (next.getFullYear() >= 1 && next.getFullYear() <= 9999) selectDate(dateKey(next), true);
+            });
+            calendarGrid.appendChild(day);
+        }
     }
 
-    closeModalBtn.addEventListener('click', closeDayModal);
-    window.addEventListener('click', (e) => {
-        if (e.target === modal) closeDayModal();
-    });
-
-    function renderModalContent() {
+    function renderDayPanel() {
         if (!activeDateStr) return;
         
+        document.getElementById('selected-date-title').textContent = formatDate(activeDateStr);
         const dayData = getDayData(activeDateStr);
+        document.getElementById('tasks-empty').hidden = dayData.tasks.length > 0;
+        taskList.hidden = dayData.tasks.length === 0;
         dayGeneralNote.value = dayData.generalNote || "";
         
+        const scrollTop = taskList.scrollTop;
         taskList.replaceChildren();
         const dateStr = activeDateStr;
+        if (!dayData.tasks.some(task => task.id === expandedTaskId)) expandedTaskId = null;
+        const noteEditors = new Map();
         
         let completedCount = 0;
 
-        dayData.tasks.forEach(task => {
+        dayData.tasks.forEach((task, index) => {
             if (task.completed) completedCount++;
             
             const li = document.createElement('li');
@@ -556,57 +545,133 @@ function initStudyPlanner() {
             const text = document.createElement('span');
             text.className = 'task-text';
             text.textContent = task.text;
+            text.title = task.text;
             checkboxWrapper.appendChild(checkbox);
             checkboxWrapper.appendChild(text);
             header.appendChild(checkboxWrapper);
+            if (task.isDeadline) {
+                const badge = document.createElement('span');
+                badge.className = 'task-deadline-label';
+                badge.textContent = 'Due';
+                badge.title = 'Exam or important deadline';
+                header.appendChild(badge);
+            }
+            const noteToggle = document.createElement('button');
+            noteToggle.type = 'button';
+            noteToggle.setAttribute('aria-controls', `task-note-editor-${index}`);
+            header.appendChild(noteToggle);
             const deleteBtn = document.createElement('button');
             deleteBtn.type = 'button';
             deleteBtn.className = 'btn-delete-task';
             deleteBtn.title = 'Delete task';
-            deleteBtn.textContent = '×';
+            deleteBtn.textContent = '\u00d7';
+            deleteBtn.setAttribute('aria-label', 'Delete task: ' + task.text);
             header.appendChild(deleteBtn);
             li.appendChild(header);
+            const noteEditor = document.createElement('div');
+            noteEditor.className = 'task-note-editor';
+            noteEditor.id = `task-note-editor-${index}`;
+            noteEditor.hidden = task.id !== expandedTaskId;
+            const noteLabel = document.createElement('label');
+            noteLabel.textContent = 'Task note';
+            noteLabel.setAttribute('for', `task-note-input-${index}`);
+            noteEditor.appendChild(noteLabel);
             const noteInput = document.createElement('input');
             noteInput.type = 'text';
+            noteInput.id = `task-note-input-${index}`;
             noteInput.className = 'task-note-input';
             noteInput.placeholder = 'Add a short task note';
-            noteInput.setAttribute('aria-label', 'Task note');
+            noteInput.setAttribute('aria-label', 'Task note: ' + task.text);
             noteInput.value = task.note;
-            li.appendChild(noteInput);
+            let savedInputValue = noteInput.value;
+            noteEditor.appendChild(noteInput);
+            li.appendChild(noteEditor);
+
+            function updateNoteIndicator(note) {
+                noteToggle.className = 'task-note-toggle' + (note.trim() ? ' has-note' : '');
+                noteToggle.textContent = note.trim() ? 'Note \u2022' : 'Note';
+                noteToggle.setAttribute('aria-label', (note.trim() ? 'Edit note: ' : 'Add note: ') + task.text);
+            }
+            updateNoteIndicator(task.note);
+            noteToggle.setAttribute('aria-expanded', String(!noteEditor.hidden));
+
+            function saveNote(afterSave = () => {}) {
+                const note = noteInput.value;
+                savePlannerData(data => {
+                    data[dateStr].tasks.find(item => item.id === task.id).note = note;
+                }, () => {
+                    savedInputValue = note;
+                    updateNoteIndicator(note);
+                    afterSave();
+                });
+            }
+            noteEditors.set(task.id, {
+                panel: noteEditor, toggle: noteToggle,
+                isDirty: () => noteInput.value !== savedInputValue, save: saveNote
+            });
+            noteToggle.addEventListener('click', () => {
+                if (editingBlocked) return;
+                const applyToggle = () => {
+                    expandedTaskId = expandedTaskId === task.id ? null : task.id;
+                    noteEditors.forEach((editor, id) => {
+                        editor.panel.hidden = id !== expandedTaskId;
+                        editor.toggle.setAttribute('aria-expanded', String(!editor.panel.hidden));
+                    });
+                    if (noteEditor.hidden) noteToggle.focus();
+                    else noteInput.focus();
+                };
+                const previous = noteEditors.get(expandedTaskId);
+                // A normal blur saves first; also protect drafts when a control
+                // is activated without a blur (for example by assistive tools).
+                if (previous?.isDirty()) previous.save(applyToggle);
+                else applyToggle();
+            });
 
             checkbox.addEventListener('change', (e) => {
                 const completed = e.target.checked;
                 e.target.checked = task.completed;
                 savePlannerData(data => {
                     data[dateStr].tasks.find(item => item.id === task.id).completed = completed;
-                }, refreshPlanner);
+                }, () => {
+                    refreshPlanner();
+                    const index = getDayData(dateStr).tasks.findIndex(item => item.id === task.id);
+                    taskList.children[index]?.querySelector('.task-checkbox')?.focus();
+                });
             });
 
             deleteBtn.addEventListener('click', () => {
+                const index = getDayData(dateStr).tasks.findIndex(item => item.id === task.id);
                 savePlannerData(data => {
                     data[dateStr].tasks = data[dateStr].tasks.filter(item => item.id !== task.id);
-                }, refreshPlanner);
+                }, () => {
+                    refreshPlanner();
+                    const nextRow = taskList.children[Math.min(index, taskList.children.length - 1)];
+                    (nextRow?.querySelector('.task-checkbox') || newTaskInput).focus();
+                });
             });
 
-            noteInput.addEventListener('change', (e) => {
-                const note = e.target.value;
-                savePlannerData(data => {
-                    data[dateStr].tasks.find(item => item.id === task.id).note = note;
-                }, refreshPlanner);
+            noteInput.addEventListener('change', () => {
+                if (!editingBlocked) saveNote(); // Preserve row nodes while focus moves.
             });
-
             taskList.appendChild(li);
         });
 
+        taskList.scrollTop = scrollTop;
         statTotal.textContent = dayData.tasks.length;
         statCompleted.textContent = completedCount;
+        document.getElementById('day-progress-bar').value = dayData.tasks.length ? completedCount / dayData.tasks.length * 100 : 0;
         lockEditing(editingBlocked);
     }
 
     function refreshPlanner() {
-        renderModalContent();
+        renderDayPanel();
+        refreshOverview();
+    }
+
+    function refreshOverview() {
         renderCalendar();
         renderUpcomingDeadlines();
+        renderMonthlyOverview();
     }
 
     addTaskForm.addEventListener('submit', (e) => {
@@ -630,6 +695,8 @@ function initStudyPlanner() {
                 newTaskInput.value = '';
                 if (deadlineCheckbox) deadlineCheckbox.checked = false;
                 refreshPlanner();
+                taskList.scrollTop = taskList.scrollHeight;
+                newTaskInput.focus();
             });
         }
     });
@@ -638,167 +705,82 @@ function initStudyPlanner() {
         if (activeDateStr && !editingBlocked) {
             const dateStr = activeDateStr;
             const note = e.target.value;
-            savePlannerData(data => { editDay(data, dateStr).generalNote = note; }, refreshPlanner);
+            savePlannerData(data => { editDay(data, dateStr).generalNote = note; }, () => {
+                // Update only the marker: replacing calendar buttons here would
+                // interrupt a date click that caused this field to lose focus.
+                const day = calendarGrid.querySelector('.selected');
+                day.querySelector('.day-note-icon')?.remove();
+                if (note.trim()) {
+                    const marker = document.createElement('span');
+                    marker.className = 'day-note-icon';
+                    marker.textContent = '\u2022';
+                    marker.title = 'Daily note';
+                    day.appendChild(marker);
+                }
+                const tasks = getDayData(dateStr).tasks;
+                day.setAttribute('aria-label', formatDate(dateStr) + ': ' + tasks.filter(task => task.completed).length +
+                    ' of ' + tasks.length + ' tasks completed' + (note.trim() ? ', daily note' : '') +
+                    (tasks.some(task => task.isDeadline && !task.completed) ? ', pending deadline' : ''));
+            });
         }
     });
 
-    prevMonthBtn.addEventListener('click', () => {
-        currentMonth--;
-        if (currentMonth < 0) {
-            currentMonth = 11;
-            currentYear--;
-        }
-        renderCalendar();
-    });
+    function changeMonth(offset) {
+        if (editingBlocked) return;
+        const date = localDate(activeDateStr);
+        const day = date.getDate();
+        date.setDate(1);
+        date.setMonth(date.getMonth() + offset);
+        if (date.getFullYear() < 1 || date.getFullYear() > 9999) return;
+        date.setDate(Math.min(day, new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()));
+        selectDate(dateKey(date));
+    }
+    prevMonthBtn.addEventListener('click', () => changeMonth(-1));
+    nextMonthBtn.addEventListener('click', () => changeMonth(1));
 
-    nextMonthBtn.addEventListener('click', () => {
-        currentMonth++;
-        if (currentMonth > 11) {
-            currentMonth = 0;
-            currentYear++;
-        }
-        renderCalendar();
-    });
-
-    // Alert Panel Logic
     function renderUpcomingDeadlines() {
-        const alertsContainer = document.getElementById('alerts-container');
-        const alertsPanel = document.getElementById('deadline-alerts-panel');
-        if (!alertsContainer || !alertsPanel) return;
-
-        alertsContainer.replaceChildren();
-        let upcomingAlerts = [];
-        const today = new Date();
-        today.setHours(0,0,0,0);
-
-        Object.keys(plannerData).forEach(dateStr => {
-            const dayData = plannerData[dateStr];
-            if (dayData && dayData.tasks) {
-                dayData.tasks.forEach(task => {
-                    if (task.isDeadline && !task.completed) {
-                        const [y, m, d] = dateStr.split('-');
-                        const taskDate = new Date(y, m - 1, d);
-                        const diffTime = taskDate - today;
-                        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-                        
-                        if (diffDays >= 0 && diffDays <= 3) { // Show up to 3 days away in the panel as requested
-                            upcomingAlerts.push({
-                                task: task,
-                                dateStr: dateStr,
-                                diffDays: diffDays
-                            });
-                        }
-                    }
-                });
-            }
+        const container = document.getElementById('alerts-container');
+        container.replaceChildren();
+        const upcoming = [];
+        Object.entries(plannerData).forEach(([dateStr, day]) => {
+            const diff = daysFromToday(dateStr);
+            if (diff < 0 || diff > 5) return;
+            day.tasks.filter(task => task.isDeadline && !task.completed).forEach(task => upcoming.push({ dateStr, task, diff }));
         });
-
-        upcomingAlerts.sort((a, b) => a.diffDays - b.diffDays);
-
-        if (upcomingAlerts.length === 0) {
-            alertsPanel.style.display = 'none'; // Hide the panel completely
-            return;
-        } else {
-            alertsPanel.style.display = 'block'; // Show if there are alerts
-        }
-
-        upcomingAlerts.forEach(alertItem => {
+        upcoming.sort((a, b) => a.diff - b.diff);
+        document.getElementById('deadlines-empty').hidden = upcoming.length > 0;
+        upcoming.forEach(({ dateStr, task, diff }) => {
             const card = document.createElement('div');
-            card.classList.add('alert-card');
-            
-            let timeText = alertItem.diffDays === 0 ? "Bugün!" : `Son ${alertItem.diffDays} Gün`;
-            
-            // Format date nicely
-            const [y, m, d] = alertItem.dateStr.split('-');
-            const dateNice = `${d}.${m}.${y}`;
-
-            const title = document.createElement('div');
+            card.className = 'alert-card' + (diff <= 3 ? ' urgent' : '');
+            const title = document.createElement('p');
             title.className = 'alert-title';
-            title.textContent = alertItem.task.text;
-            const time = document.createElement('div');
+            title.textContent = task.text;
+            const time = document.createElement('p');
             time.className = 'alert-time';
-            time.textContent = timeText + ' ';
-            const date = document.createElement('span');
-            date.style.color = 'var(--text-muted)';
-            date.style.fontSize = '0.75rem';
-            date.style.fontWeight = 'normal';
-            date.textContent = `(${dateNice})`;
-            time.appendChild(date);
+            time.textContent = (diff === 0 ? 'Due today' : diff === 1 ? 'Due tomorrow' : 'Due in ' + diff + ' days') + ' / ' + formatDate(dateStr);
             card.appendChild(title);
             card.appendChild(time);
-            alertsContainer.appendChild(card);
+            container.appendChild(card);
         });
     }
 
-    // AI Analysis Logic
-    renderCalendar();
-    renderUpcomingDeadlines();
-    const btnAiAnalyze = document.getElementById('btn-ai-analyze');
-    const aiModal = document.getElementById('ai-modal');
-    const closeAiModalBtn = document.getElementById('close-ai-modal');
-    const aiAnalysisContent = document.getElementById('ai-analysis-content');
-
-    function closeAiModal() {
-        aiModal.classList.remove('show');
+    function renderMonthlyOverview() {
+        const prefix = String(currentYear).padStart(4, '0') + '-' + String(currentMonth + 1).padStart(2, '0') + '-';
+        const tasks = Object.entries(plannerData).filter(([date]) => date.startsWith(prefix)).flatMap(([, day]) => day.tasks);
+        const total = tasks.length;
+        const completed = tasks.filter(task => task.completed).length;
+        const remaining = total - completed;
+        const rate = total ? Math.round(completed / total * 100) : 0;
+        document.getElementById('month-total').textContent = total;
+        document.getElementById('month-completed').textContent = completed;
+        document.getElementById('month-remaining').textContent = remaining;
+        document.getElementById('month-rate').textContent = rate + '%';
+        document.getElementById('month-progress-bar').value = total ? completed / total * 100 : 0;
+        document.getElementById('monthly-summary').textContent = !total
+            ? 'No tasks planned this month yet. Select a day and add your first study goal.'
+            : completed + ' of ' + total + ' tasks completed in ' + monthNames[currentMonth] + '. ' +
+                (remaining ? remaining + (remaining === 1 ? ' task remains.' : ' tasks remain.') : 'Every planned task is complete.');
     }
 
-    if (closeAiModalBtn) {
-        closeAiModalBtn.addEventListener('click', closeAiModal);
-    }
-    window.addEventListener('click', (e) => {
-        if (e.target === aiModal) closeAiModal();
-    });
-
-    if (btnAiAnalyze) {
-        btnAiAnalyze.addEventListener('click', () => {
-            // Calculate stats for the current month
-            let totalTasks = 0;
-            let completedTasks = 0;
-            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-            
-            for (let i = 1; i <= daysInMonth; i++) {
-                const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-                const dayData = plannerData[dateStr];
-                if (dayData && dayData.tasks) {
-                    totalTasks += dayData.tasks.length;
-                    completedTasks += dayData.tasks.filter(t => t.completed).length;
-                }
-            }
-
-            aiModal.classList.add('show');
-            aiAnalysisContent.innerHTML = '<i>Düşünüyor...</i>';
-
-            setTimeout(() => {
-                if (totalTasks === 0) {
-                    aiAnalysisContent.innerHTML = `Bu ay henüz hiç görev eklememişsin. Çalışma planını oluşturmak için takvimden günlere tıklayabilirsin! 🚀`;
-                    return;
-                }
-
-                const completionRate = Math.round((completedTasks / totalTasks) * 100);
-                let message = ``;
-
-                if (completionRate === 100) {
-                    message = `<b>Mükemmel bir performans!</b> Bu ay planladığın her şeyi başardın. Disiplinin gerçekten etkileyici. Kendinle gurur duymalısın! 🌟`;
-                } else if (completionRate >= 80) {
-                    message = `<b>Harika gidiyorsun!</b> Planlarına sadık kaldığın verimli bir ay geçirmişsin. Ufak tefek aksaklıklar olsa da genel tablon çok başarılı. Aynen böyle devam et! 🔥`;
-                } else if (completionRate >= 50) {
-                    message = `<b>Güzel bir çaba!</b> İşlerin yarısından fazlasını bitirmişsin ancak biraz daha odaklanmaya ihtiyacın olabilir. Hedeflerini küçük parçalara bölmeyi denemek ister misin? 💪`;
-                } else {
-                    message = `<b>Bu ay biraz zorlu geçmiş gibi görünüyor.</b> İşlerin birikmesi moralini bozmasın. Önümüzdeki ay için kendine daha gerçekçi ve ulaşılabilir hedefler koyarak yeni bir başlangıç yapabilirsin. Unutma, her gün yeni bir şanstır! 🌱`;
-                }
-
-                const monthNames = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
-                
-                aiAnalysisContent.innerHTML = `
-                    <h4 style="margin-bottom: 1rem;">${monthNames[currentMonth]} ${currentYear} Özeti</h4>
-                    <p>Toplam Görev: <b>${totalTasks}</b></p>
-                    <p>Tamamlanan: <b>${completedTasks}</b></p>
-                    <p style="margin-bottom: 1.5rem;">Başarı Oranı: <b>%${completionRate}</b></p>
-                    <p>${message}</p>
-                `;
-            }, 800); // Simulate AI thinking delay
-        });
-    }
-
-    renderCalendar();
+    refreshPlanner();
 }
