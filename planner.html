@@ -40,6 +40,12 @@
 
   <main>
     <section class="study-planner container">
+      <div id="planner-storage-notice" class="planner-storage-notice" hidden>
+        <p id="planner-storage-message" role="alert"></p>
+        <button id="planner-export-raw" type="button" class="button button-secondary">Download raw saved data</button>
+        <button id="planner-retry-save" type="button" class="button button-secondary" hidden>Retry save</button>
+      </div>
+      <p id="planner-save-status" class="planner-save-status" role="status" aria-live="polite"></p>
       <div class="calendar-header" style="max-width: 800px; margin: 0 auto 20px auto;">
         <div class="header-left" style="display: flex; align-items: center; gap: 15px;">
           <button id="prev-month" class="calendar-nav-btn">&lt;</button>
@@ -81,6 +87,10 @@
       <div class="modal-content">
         <span class="close-modal">&times;</span>
         <h3 id="modal-date-title">Date</h3>
+        <div id="planner-modal-storage-notice" class="planner-storage-notice" hidden>
+          <p id="planner-modal-storage-message" role="alert"></p>
+          <button id="planner-modal-retry-save" type="button" class="button button-secondary" hidden>Retry save</button>
+        </div>
 
         <div class="day-stats">
           <div class="stat-box">

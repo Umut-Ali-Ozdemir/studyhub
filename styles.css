@@ -1231,6 +1231,30 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
 }
 
 /* --- CALENDAR PLANNER STYLES --- */
+.planner-storage-notice[hidden],
+.planner-storage-notice button[hidden] {
+    display: none;
+}
+
+.study-planner .planner-storage-notice,
+#day-modal .planner-storage-notice {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--danger);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    text-align: left;
+}
+
+.planner-storage-notice p {
+    margin-bottom: 0.75rem;
+}
+
+.study-planner .planner-save-status {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
 .study-planner {
     background-color: var(--background-color);
     padding: 2rem 2%;

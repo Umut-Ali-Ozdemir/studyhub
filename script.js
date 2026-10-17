@@ -215,6 +215,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // --- STUDY PLANNER LOGIC ---
 
+// Validate before displaying or writing. Missing legacy optional fields get safe
+// defaults in memory; validation never repairs or replaces the saved record.
+function validatePlannerData(value) {
+    const isRecord = item => item !== null && typeof item === 'object' && !Array.isArray(item);
+    if (!isRecord(value)) throw new Error('Invalid planner root');
+    const ids = new Set();
+    const normalized = {};
+    for (const [date, day] of Object.entries(value)) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error('Invalid planner date');
+        const [year, month, number] = date.split('-').map(Number);
+        const parsedDate = new Date(0);
+        parsedDate.setFullYear(year, month - 1, number);
+        if (year < 1 || parsedDate.getFullYear() !== year ||
+            parsedDate.getMonth() !== month - 1 || parsedDate.getDate() !== number) {
+            throw new Error('Invalid planner date');
+        }
+        if (!isRecord(day) || !Array.isArray(day.tasks) ||
+            (day.generalNote !== undefined && typeof day.generalNote !== 'string')) {
+            throw new Error('Invalid planner day');
+        }
+        const tasks = day.tasks.map(task => {
+            if (!isRecord(task) ||
+                !(typeof task.id === 'number' && Number.isSafeInteger(task.id) && task.id >= 0 ||
+                  typeof task.id === 'string' && task.id.trim() !== '') ||
+                ids.has(task.id) || typeof task.text !== 'string' || !task.text.trim() ||
+                typeof task.completed !== 'boolean' ||
+                (task.note !== undefined && typeof task.note !== 'string') ||
+                (task.isDeadline !== undefined && typeof task.isDeadline !== 'boolean')) {
+                throw new Error('Invalid planner task');
+            }
+            ids.add(task.id);
+            return { ...task, note: task.note ?? '', isDeadline: task.isDeadline ?? false };
+        });
+        normalized[date] = { ...day, generalNote: day.generalNote ?? '', tasks };
+    }
+    return normalized;
+}
+
 function initStudyPlanner() {
     const calendarGrid = document.getElementById('calendar-grid');
     if (!calendarGrid) return; // Exit if not on planner page
@@ -232,21 +270,125 @@ function initStudyPlanner() {
 
     // Planner Data State
     // Format: { "YYYY-MM-DD": { generalNote: "", tasks: [ { id: 1, text: "Math", completed: false, note: "50 q" } ] } }
-    let plannerData = JSON.parse(localStorage.getItem('studyHubPlannerData')) || {};
+    const storageKey = 'studyHubPlannerData';
+    let plannerData;
+    let savedRaw;
+    let exportRaw;
+    let retrySave = null;
+    let editingBlocked = false;
+    let idSequence = 0;
+    const storageNotice = document.getElementById('planner-storage-notice');
+    const storageMessage = document.getElementById('planner-storage-message');
+    const modalNotice = document.getElementById('planner-modal-storage-notice');
+    const modalMessage = document.getElementById('planner-modal-storage-message');
+    const exportButton = document.getElementById('planner-export-raw');
+    const retryButtons = [document.getElementById('planner-retry-save'), document.getElementById('planner-modal-retry-save')];
+    const saveStatus = document.getElementById('planner-save-status');
 
-    function savePlannerData() {
-        localStorage.setItem('studyHubPlannerData', JSON.stringify(plannerData));
+    function lockEditing(blocked) {
+        editingBlocked = blocked;
+        document.querySelectorAll('#add-task-form input, #add-task-form button, #task-list input, #task-list button, #day-general-note').forEach(control => {
+            if (control.tagName === 'TEXTAREA' || control.tagName === 'INPUT' && control.type === 'text') {
+                control.readOnly = blocked;
+            } else control.disabled = blocked;
+        });
     }
 
-    function getDayData(dateStr) {
-        if (!plannerData[dateStr]) {
-            plannerData[dateStr] = { generalNote: "", tasks: [] };
+    function showStorageError(message, retry = null) {
+        retrySave = retry;
+        storageMessage.textContent = message;
+        modalMessage.textContent = message;
+        storageNotice.hidden = modalNotice.hidden = false;
+        exportButton.disabled = typeof exportRaw !== 'string';
+        retryButtons.forEach(button => { button.hidden = !retry; });
+        saveStatus.textContent = 'Not saved. Editing is paused to protect your data.';
+        lockEditing(true);
+    }
+
+    retryButtons.forEach(button => button.addEventListener('click', () => retrySave?.()));
+    exportButton.addEventListener('click', () => {
+        if (typeof exportRaw !== 'string') return;
+        let url;
+        let link;
+        try {
+            url = URL.createObjectURL(new Blob([exportRaw], { type: 'application/json' }));
+            link = document.createElement('a');
+            link.href = url;
+            link.download = 'studyhub-planner-raw.json';
+            document.body.appendChild(link);
+            link.click();
+        } catch {
+            storageMessage.textContent = 'The saved record is still preserved, but the download could not start. Try another browser or allow downloads.';
+        } finally {
+            link?.remove();
+            if (url) setTimeout(() => URL.revokeObjectURL(url), 0);
         }
-        return plannerData[dateStr];
+    });
+
+    try {
+        savedRaw = localStorage.getItem(storageKey);
+        exportRaw = savedRaw;
+        plannerData = validatePlannerData(savedRaw === null ? {} : JSON.parse(savedRaw));
+    } catch {
+        showStorageError('Planner data could not be read or validated. The saved record has not been changed. Editing is disabled. Download the raw record if available before attempting recovery.');
+        monthYearEl.textContent = 'Planner unavailable';
+        prevMonthBtn.disabled = nextMonthBtn.disabled = true;
+        const analysisButton = document.getElementById('btn-ai-analyze');
+        if (analysisButton) analysisButton.disabled = true;
+        return;
+    }
+
+    // Write a validated copy first. The live model and successful UI state only
+    // change after setItem succeeds. A failed operation remains retryable.
+    function savePlannerData(change, afterSave, isRetry = false) {
+        if (editingBlocked && !isRetry) return;
+        const retry = () => savePlannerData(change, afterSave, true);
+        try {
+            const latest = localStorage.getItem(storageKey);
+            if (latest !== savedRaw) {
+                exportRaw = latest;
+                showStorageError('Saved data changed elsewhere. This change was not saved and the stored record was not overwritten. Download the saved record and reload before editing.');
+                return;
+            }
+            const candidate = validatePlannerData(JSON.parse(JSON.stringify(plannerData)));
+            change(candidate);
+            const validCandidate = validatePlannerData(candidate);
+            const serialized = JSON.stringify(validCandidate);
+            localStorage.setItem(storageKey, serialized);
+            plannerData = validCandidate;
+            savedRaw = exportRaw = serialized;
+        } catch {
+            showStorageError('This change was not saved. The previous saved record is unchanged. Keep this page open and choose Retry save, or download the saved data.', retry);
+            return;
+        }
+        retrySave = null;
+        storageNotice.hidden = modalNotice.hidden = true;
+        lockEditing(false);
+        saveStatus.textContent = 'Changes saved in this browser.';
+        afterSave();
+    }
+
+    function getDayData(dateStr, data = plannerData) {
+        return data[dateStr] || { generalNote: '', tasks: [] };
+    }
+
+    function editDay(data, dateStr) {
+        if (!data[dateStr]) data[dateStr] = { generalNote: '', tasks: [] };
+        return data[dateStr];
+    }
+
+    function createTaskId() {
+        const usedIds = new Set(Object.values(plannerData).flatMap(day => day.tasks.map(task => task.id)));
+        let id;
+        do {
+            const random = globalThis.crypto?.randomUUID?.() || Date.now();
+            id = `task-${random}-${++idSequence}`;
+        } while (usedIds.has(id));
+        return id;
     }
 
     function renderCalendar() {
-        calendarGrid.innerHTML = '';
+        calendarGrid.replaceChildren();
         
         const firstDay = new Date(currentYear, currentMonth, 1).getDay();
         const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
@@ -279,7 +421,10 @@ function initStudyPlanner() {
 
             const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
             
-            dayCell.innerHTML = `<div class="day-number">${i}</div>`;
+            const dayNumber = document.createElement('div');
+            dayNumber.className = 'day-number';
+            dayNumber.textContent = i;
+            dayCell.appendChild(dayNumber);
             
             // Render preview tasks and notes
             const dayData = plannerData[dateStr];
@@ -387,7 +532,8 @@ function initStudyPlanner() {
         const dayData = getDayData(activeDateStr);
         dayGeneralNote.value = dayData.generalNote || "";
         
-        taskList.innerHTML = '';
+        taskList.replaceChildren();
+        const dateStr = activeDateStr;
         
         let completedCount = 0;
 
@@ -399,39 +545,54 @@ function initStudyPlanner() {
             if (task.completed) li.classList.add('completed');
             if (task.isDeadline) li.classList.add('is-exam');
             
-            li.innerHTML = `
-                <div class="task-item-header">
-                    <div class="task-checkbox-wrapper">
-                        <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''}>
-                        <span class="task-text">${task.text}</span>
-                    </div>
-                    <button class="btn-delete-task" title="Sil">×</button>
-                </div>
-                <input type="text" class="task-note-input" placeholder="Küçük not ekle (Örn: 50 soru çözüldü, 40dk çalışıldı...)" value="${task.note || ''}">
-            `;
-            
-            const checkbox = li.querySelector('.task-checkbox');
+            const header = document.createElement('div');
+            header.className = 'task-item-header';
+            const checkboxWrapper = document.createElement('label');
+            checkboxWrapper.className = 'task-checkbox-wrapper';
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'task-checkbox';
+            checkbox.checked = task.completed;
+            const text = document.createElement('span');
+            text.className = 'task-text';
+            text.textContent = task.text;
+            checkboxWrapper.appendChild(checkbox);
+            checkboxWrapper.appendChild(text);
+            header.appendChild(checkboxWrapper);
+            const deleteBtn = document.createElement('button');
+            deleteBtn.type = 'button';
+            deleteBtn.className = 'btn-delete-task';
+            deleteBtn.title = 'Delete task';
+            deleteBtn.textContent = '×';
+            header.appendChild(deleteBtn);
+            li.appendChild(header);
+            const noteInput = document.createElement('input');
+            noteInput.type = 'text';
+            noteInput.className = 'task-note-input';
+            noteInput.placeholder = 'Add a short task note';
+            noteInput.setAttribute('aria-label', 'Task note');
+            noteInput.value = task.note;
+            li.appendChild(noteInput);
+
             checkbox.addEventListener('change', (e) => {
-                task.completed = e.target.checked;
-                savePlannerData();
-                renderModalContent(); // re-render to update stats and styles
-                renderCalendar(); // update background calendar
-                renderUpcomingDeadlines(); // update alerts panel
+                const completed = e.target.checked;
+                e.target.checked = task.completed;
+                savePlannerData(data => {
+                    data[dateStr].tasks.find(item => item.id === task.id).completed = completed;
+                }, refreshPlanner);
             });
 
-            const deleteBtn = li.querySelector('.btn-delete-task');
             deleteBtn.addEventListener('click', () => {
-                dayData.tasks = dayData.tasks.filter(t => t.id !== task.id);
-                savePlannerData();
-                renderModalContent();
-                renderCalendar();
-                renderUpcomingDeadlines(); // update alerts panel
+                savePlannerData(data => {
+                    data[dateStr].tasks = data[dateStr].tasks.filter(item => item.id !== task.id);
+                }, refreshPlanner);
             });
 
-            const noteInput = li.querySelector('.task-note-input');
             noteInput.addEventListener('change', (e) => {
-                task.note = e.target.value;
-                savePlannerData();
+                const note = e.target.value;
+                savePlannerData(data => {
+                    data[dateStr].tasks.find(item => item.id === task.id).note = note;
+                }, refreshPlanner);
             });
 
             taskList.appendChild(li);
@@ -439,6 +600,13 @@ function initStudyPlanner() {
 
         statTotal.textContent = dayData.tasks.length;
         statCompleted.textContent = completedCount;
+        lockEditing(editingBlocked);
+    }
+
+    function refreshPlanner() {
+        renderModalContent();
+        renderCalendar();
+        renderUpcomingDeadlines();
     }
 
     addTaskForm.addEventListener('submit', (e) => {
@@ -447,30 +615,30 @@ function initStudyPlanner() {
         const deadlineCheckbox = document.getElementById('new-task-deadline');
         const isDeadline = deadlineCheckbox ? deadlineCheckbox.checked : false;
 
-        if (text && activeDateStr) {
-            const dayData = getDayData(activeDateStr);
-            dayData.tasks.push({
-                id: Date.now(),
+        if (text && activeDateStr && !editingBlocked) {
+            const dateStr = activeDateStr;
+            const newTask = {
+                id: createTaskId(),
                 text: text,
                 completed: false,
                 note: "",
                 isDeadline: isDeadline
+            };
+            savePlannerData(data => {
+                editDay(data, dateStr).tasks.push(newTask);
+            }, () => {
+                newTaskInput.value = '';
+                if (deadlineCheckbox) deadlineCheckbox.checked = false;
+                refreshPlanner();
             });
-            savePlannerData();
-            newTaskInput.value = '';
-            if (deadlineCheckbox) deadlineCheckbox.checked = false;
-            renderModalContent();
-            renderCalendar();
-            renderUpcomingDeadlines();
         }
     });
 
     dayGeneralNote.addEventListener('change', (e) => {
-        if (activeDateStr) {
-            const dayData = getDayData(activeDateStr);
-            dayData.generalNote = e.target.value;
-            savePlannerData();
-            renderCalendar();
+        if (activeDateStr && !editingBlocked) {
+            const dateStr = activeDateStr;
+            const note = e.target.value;
+            savePlannerData(data => { editDay(data, dateStr).generalNote = note; }, refreshPlanner);
         }
     });
 
@@ -498,7 +666,7 @@ function initStudyPlanner() {
         const alertsPanel = document.getElementById('deadline-alerts-panel');
         if (!alertsContainer || !alertsPanel) return;
 
-        alertsContainer.innerHTML = '';
+        alertsContainer.replaceChildren();
         let upcomingAlerts = [];
         const today = new Date();
         today.setHours(0,0,0,0);
@@ -544,10 +712,20 @@ function initStudyPlanner() {
             const [y, m, d] = alertItem.dateStr.split('-');
             const dateNice = `${d}.${m}.${y}`;
 
-            card.innerHTML = `
-                <div class="alert-title">${alertItem.task.text}</div>
-                <div class="alert-time">${timeText} <span style="color:#888; font-size:0.75rem; font-weight:normal;">(${dateNice})</span></div>
-            `;
+            const title = document.createElement('div');
+            title.className = 'alert-title';
+            title.textContent = alertItem.task.text;
+            const time = document.createElement('div');
+            time.className = 'alert-time';
+            time.textContent = timeText + ' ';
+            const date = document.createElement('span');
+            date.style.color = 'var(--text-muted)';
+            date.style.fontSize = '0.75rem';
+            date.style.fontWeight = 'normal';
+            date.textContent = `(${dateNice})`;
+            time.appendChild(date);
+            card.appendChild(title);
+            card.appendChild(time);
             alertsContainer.appendChild(card);
         });
     }

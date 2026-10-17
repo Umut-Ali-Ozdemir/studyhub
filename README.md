@@ -36,7 +36,9 @@ Open `index.html` in a modern browser, or serve this directory with an existing 
 
 ## Checks
 
-With Node.js installed, run `node --test tests/practice.test.cjs` to check the question bank, answer keys, selection, scoring, navigation and restart flows. The UI tests use a small DOM substitute; they do not replace real-browser responsive, keyboard or screen-reader testing.
+With Node.js installed, run `node --test tests/planner.test.cjs tests/practice.test.cjs` to check Planner validation, safe text rendering, storage failures and legacy compatibility, as well as Practice Hub questions, scoring and navigation. The UI tests use a small DOM substitute; they do not replace real-browser responsive, keyboard, download or screen-reader testing.
+
+Planner rejects malformed saved records without replacing them and offers a raw JSON download when the saved text can be read. Failed writes leave the last saved record unchanged and pause editing until the operation is retried or the page is reloaded. Export the saved record before attempting manual recovery; partial or automatic repair is not implemented.
 
 ## Current limits
 
